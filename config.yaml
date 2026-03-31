@@ -7,7 +7,6 @@ database:
   user: futa
   password: XgOE12FrBx4mRUZdY8MABw
   dbname: defaultdb
-  sslmode: disable
 
 worker:
   poll_interval: 30s
