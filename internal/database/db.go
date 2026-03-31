@@ -243,7 +243,7 @@ func (db *DB) getStats(ctx context.Context, emailAddr string) (*Stats, error) {
 func (db *DB) GetPendingSchedules(ctx context.Context, maxRetries int) ([]BookingSchedule, error) {
 	query := `SELECT ` + scheduleColumns + ` FROM booking_schedules
 		WHERE status IN ('pending', 'searching')
-		AND retry_count < $1
+		-- AND retry_count < $1
 		AND travel_date >= CURRENT_DATE
 		ORDER BY travel_date ASC, created_at ASC`
 
