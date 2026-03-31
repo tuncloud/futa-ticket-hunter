@@ -2,11 +2,11 @@ server:
   port: 8080
 
 database:
-  host: localhost
-  port: 5432
+  host: tuando-17197.j77.aws-ap-southeast-1.cockroachlabs.cloud
+  port: 26257
   user: futa
-  password: futa_secret
-  dbname: futa_hunter
+  password: XgOE12FrBx4mRUZdY8MABw
+  dbname: defaultdb
   sslmode: disable
 
 worker:
