@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -12,26 +11,13 @@ import (
 
 // === Models ===
 
-type AppSettings struct {
-	ID            int       `json:"id"`
-	RefreshToken  string    `json:"refresh_token"`
-	FullName      string    `json:"full_name"`
-	Phone         string    `json:"phone"`
-	Email         string    `json:"email"`
-	WebhookURL    string    `json:"webhook_url"`
-	WebhookSecret string    `json:"webhook_secret"`
-	UpdatedAt     time.Time `json:"updated_at"`
-}
-
 type BookingSchedule struct {
 	ID string `json:"id"`
 
-	OriginKeyword string `json:"origin_keyword"`
-	OriginAreaID  string `json:"origin_area_id"`
-	OriginName    string `json:"origin_name"`
-	DestKeyword   string `json:"dest_keyword"`
-	DestAreaID    string `json:"dest_area_id"`
-	DestName      string `json:"dest_name"`
+	OriginAreaID string `json:"origin_area_id"`
+	OriginName   string `json:"origin_name"`
+	DestAreaID   string `json:"dest_area_id"`
+	DestName     string `json:"dest_name"`
 
 	TravelDate string `json:"travel_date"`
 	TimeFrom   string `json:"time_from"`
@@ -47,17 +33,14 @@ type BookingSchedule struct {
 
 	Status string `json:"status"`
 
-	BookingID     string          `json:"booking_id"`
-	BookingCode   string          `json:"booking_code"`
-	TicketPrice   int             `json:"ticket_price"`
-	SeatName      string          `json:"seat_name"`
-	RouteName     string          `json:"route_name"`
-	DepartureTime *time.Time      `json:"departure_time"`
-	TripInfo      json.RawMessage `json:"trip_info"`
+	BookingID     string     `json:"booking_id"`
+	BookingCode   string     `json:"booking_code"`
+	TicketPrice   int        `json:"ticket_price"`
+	SeatName      string     `json:"seat_name"`
+	DepartureTime *time.Time `json:"departure_time"`
 
-	RetryCount  int    `json:"retry_count"`
-	LastError   string `json:"last_error"`
-	WebhookSent bool   `json:"webhook_sent"`
+	RetryCount int    `json:"retry_count"`
+	LastError  string `json:"last_error"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -96,43 +79,17 @@ func (db *DB) Close() {
 	db.Pool.Close()
 }
 
-// === Settings ===
-
-func (db *DB) GetSettings(ctx context.Context) (*AppSettings, error) {
-	var s AppSettings
-	err := db.Pool.QueryRow(ctx,
-		`SELECT id, refresh_token, full_name, phone, email, webhook_url, webhook_secret, updated_at
-		 FROM app_settings WHERE id = 1`).Scan(
-		&s.ID, &s.RefreshToken, &s.FullName, &s.Phone, &s.Email,
-		&s.WebhookURL, &s.WebhookSecret, &s.UpdatedAt)
-	if err != nil {
-		return nil, err
-	}
-	return &s, nil
-}
-
-func (db *DB) UpdateSettings(ctx context.Context, s *AppSettings) error {
-	_, err := db.Pool.Exec(ctx,
-		`UPDATE app_settings SET
-			refresh_token=$1, full_name=$2, phone=$3, email=$4,
-			webhook_url=$5, webhook_secret=$6, updated_at=NOW()
-		WHERE id=1`,
-		s.RefreshToken, s.FullName, s.Phone, s.Email,
-		s.WebhookURL, s.WebhookSecret)
-	return err
-}
-
 // === Schedules ===
 
 const scheduleColumns = `id,
-	origin_keyword, origin_area_id, origin_name,
-	dest_keyword, dest_area_id, dest_name,
+	origin_area_id, origin_name,
+	dest_area_id, dest_name,
 	travel_date, time_from, time_to,
 	seat_type, seat_count, auto_book,
 	passenger_name, passenger_phone, passenger_email,
 	status, booking_id, booking_code, ticket_price,
-	seat_name, route_name, departure_time, trip_info,
-	retry_count, last_error, webhook_sent,
+	seat_name, departure_time,
+	retry_count, last_error,
 	created_at, updated_at`
 
 func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
@@ -140,14 +97,14 @@ func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
 	var travelDate time.Time
 	err := scan(
 		&s.ID,
-		&s.OriginKeyword, &s.OriginAreaID, &s.OriginName,
-		&s.DestKeyword, &s.DestAreaID, &s.DestName,
+		&s.OriginAreaID, &s.OriginName,
+		&s.DestAreaID, &s.DestName,
 		&travelDate, &s.TimeFrom, &s.TimeTo,
 		&s.SeatType, &s.SeatCount, &s.AutoBook,
 		&s.PassengerName, &s.PassengerPhone, &s.PassengerEmail,
 		&s.Status, &s.BookingID, &s.BookingCode, &s.TicketPrice,
-		&s.SeatName, &s.RouteName, &s.DepartureTime, &s.TripInfo,
-		&s.RetryCount, &s.LastError, &s.WebhookSent,
+		&s.SeatName, &s.DepartureTime,
+		&s.RetryCount, &s.LastError,
 		&s.CreatedAt, &s.UpdatedAt,
 	)
 	if err != nil {
@@ -158,43 +115,62 @@ func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
 }
 
 func (db *DB) CreateSchedule(ctx context.Context, s *BookingSchedule) error {
-	if s.TripInfo == nil {
-		s.TripInfo = json.RawMessage("{}")
-	}
 	return db.Pool.QueryRow(ctx,
 		`INSERT INTO booking_schedules (
-			origin_keyword, origin_area_id, origin_name,
-			dest_keyword, dest_area_id, dest_name,
+			origin_area_id, origin_name,
+			dest_area_id, dest_name,
 			travel_date, time_from, time_to,
 			seat_type, seat_count, auto_book,
 			passenger_name, passenger_phone, passenger_email,
-			status, trip_info
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'pending',$16)
+			status
+		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'pending')
 		RETURNING id, created_at, updated_at`,
-		s.OriginKeyword, s.OriginAreaID, s.OriginName,
-		s.DestKeyword, s.DestAreaID, s.DestName,
+		s.OriginAreaID, s.OriginName,
+		s.DestAreaID, s.DestName,
 		s.TravelDate, s.TimeFrom, s.TimeTo,
 		s.SeatType, s.SeatCount, s.AutoBook,
 		s.PassengerName, s.PassengerPhone, s.PassengerEmail,
-		s.TripInfo,
 	).Scan(&s.ID, &s.CreatedAt, &s.UpdatedAt)
 }
 
 func (db *DB) ListSchedules(ctx context.Context, statusFilter string) ([]BookingSchedule, error) {
+	return db.listSchedules(ctx, "", statusFilter)
+}
+
+func (db *DB) ListSchedulesByEmail(ctx context.Context, emailAddr, statusFilter string) ([]BookingSchedule, error) {
+	return db.listSchedules(ctx, emailAddr, statusFilter)
+}
+
+func (db *DB) listSchedules(ctx context.Context, emailAddr, statusFilter string) ([]BookingSchedule, error) {
 	query := `SELECT ` + scheduleColumns + ` FROM booking_schedules`
 	args := []any{}
+	conditions := []string{}
+	argIdx := 1
+
+	if emailAddr != "" {
+		conditions = append(conditions, fmt.Sprintf("passenger_email = $%d", argIdx))
+		args = append(args, emailAddr)
+		argIdx++
+	}
 
 	if statusFilter != "" && statusFilter != "all" {
 		switch statusFilter {
 		case "active":
-			query += ` WHERE status IN ('pending','searching','found','booking')`
+			conditions = append(conditions, "status IN ('pending','searching','found','booking')")
 		case "success":
-			query += ` WHERE status = 'success'`
+			conditions = append(conditions, "status = 'success'")
 		case "failed":
-			query += ` WHERE status IN ('failed','cancelled')`
+			conditions = append(conditions, "status IN ('failed','cancelled','expired')")
 		default:
-			query += ` WHERE status = $1`
+			conditions = append(conditions, fmt.Sprintf("status = $%d", argIdx))
 			args = append(args, statusFilter)
+		}
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + conditions[0]
+		for _, c := range conditions[1:] {
+			query += " AND " + c
 		}
 	}
 
@@ -235,17 +211,32 @@ func (db *DB) CancelSchedule(ctx context.Context, id string) error {
 }
 
 func (db *DB) GetStats(ctx context.Context) (*Stats, error) {
+	return db.getStats(ctx, "")
+}
+
+func (db *DB) GetStatsByEmail(ctx context.Context, emailAddr string) (*Stats, error) {
+	return db.getStats(ctx, emailAddr)
+}
+
+func (db *DB) getStats(ctx context.Context, emailAddr string) (*Stats, error) {
 	var s Stats
+	where := ""
+	args := []any{}
+	if emailAddr != "" {
+		where = " WHERE passenger_email = $1"
+		args = append(args, emailAddr)
+	}
 	err := db.Pool.QueryRow(ctx, `
 		SELECT
 			COUNT(*),
 			COUNT(*) FILTER (WHERE status = 'pending'),
 			COUNT(*) FILTER (WHERE status IN ('searching','found','booking')),
 			COUNT(*) FILTER (WHERE status = 'success'),
-			COUNT(*) FILTER (WHERE status = 'failed'),
+			COUNT(*) FILTER (WHERE status IN ('failed','expired')),
 			COUNT(*) FILTER (WHERE status = 'cancelled')
-		FROM booking_schedules
-	`).Scan(&s.Total, &s.Pending, &s.Searching, &s.Success, &s.Failed, &s.Cancelled)
+		FROM booking_schedules`+where,
+		args...,
+	).Scan(&s.Total, &s.Pending, &s.Searching, &s.Success, &s.Failed, &s.Cancelled)
 	return &s, err
 }
 
@@ -280,26 +271,40 @@ func (db *DB) UpdateScheduleStatus(ctx context.Context, id, status, lastError st
 	return err
 }
 
-func (db *DB) UpdateScheduleSuccess(ctx context.Context, id, bookingID, bookingCode, seatName, routeName string, price int, departureTime *time.Time) error {
+func (db *DB) UpdateScheduleSuccess(ctx context.Context, id, bookingID, bookingCode, seatName string, price int, departureTime *time.Time) error {
 	_, err := db.Pool.Exec(ctx,
 		`UPDATE booking_schedules SET
 			status='success', booking_id=$1, booking_code=$2,
-			seat_name=$3, route_name=$4, ticket_price=$5, departure_time=$6,
+			seat_name=$3, ticket_price=$4, departure_time=$5,
 			updated_at=NOW()
-		WHERE id=$7`,
-		bookingID, bookingCode, seatName, routeName, price, departureTime, id)
-	return err
-}
-
-func (db *DB) MarkWebhookSent(ctx context.Context, id string) error {
-	_, err := db.Pool.Exec(ctx,
-		`UPDATE booking_schedules SET webhook_sent=TRUE, updated_at=NOW() WHERE id=$1`, id)
+		WHERE id=$6`,
+		bookingID, bookingCode, seatName, price, departureTime, id)
 	return err
 }
 
 func (db *DB) GetRecentSchedules(ctx context.Context, limit int) ([]BookingSchedule, error) {
-	query := `SELECT ` + scheduleColumns + ` FROM booking_schedules ORDER BY updated_at DESC LIMIT $1`
-	rows, err := db.Pool.Query(ctx, query, limit)
+	return db.getRecentSchedules(ctx, "", limit)
+}
+
+func (db *DB) GetRecentSchedulesByEmail(ctx context.Context, emailAddr string, limit int) ([]BookingSchedule, error) {
+	return db.getRecentSchedules(ctx, emailAddr, limit)
+}
+
+func (db *DB) getRecentSchedules(ctx context.Context, emailAddr string, limit int) ([]BookingSchedule, error) {
+	where := ""
+	args := []any{}
+	if emailAddr != "" {
+		where = " WHERE passenger_email = $1"
+		args = append(args, emailAddr)
+		args = append(args, limit)
+	} else {
+		args = append(args, limit)
+	}
+
+	limitParam := fmt.Sprintf("$%d", len(args))
+	query := `SELECT ` + scheduleColumns + ` FROM booking_schedules` + where + ` ORDER BY updated_at DESC LIMIT ` + limitParam
+
+	rows, err := db.Pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

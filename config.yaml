@@ -15,7 +15,12 @@ worker:
 
 webhook:
   url: "https://workflow.tuando.app/webhook/e0d886bd-59d1-4a95-b596-71fc67b265bd"
-  secret: "test_secret"
+  secret: ""
+
+email:
+  resend_api_key: "re_AtkLQSGW_FUksReiiuh1cyExfZaaZNR3g"
+  from_address: "noreply@tuando.app"
+  from_name: "FutaHunter"
 
 futa:
   base_url: https://api-online.futabus.vn

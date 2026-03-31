@@ -12,6 +12,7 @@ type Config struct {
 	Database DatabaseConfig `yaml:"database"`
 	Worker   WorkerConfig   `yaml:"worker"`
 	Webhook  WebhookConfig  `yaml:"webhook"`
+	Email    EmailConfig    `yaml:"email"`
 	Futa     FutaConfig     `yaml:"futa"`
 }
 
@@ -36,6 +37,12 @@ type WorkerConfig struct {
 type WebhookConfig struct {
 	URL    string `yaml:"url"`
 	Secret string `yaml:"secret"`
+}
+
+type EmailConfig struct {
+	ResendAPIKey string `yaml:"resend_api_key"`
+	FromAddress  string `yaml:"from_address"`
+	FromName     string `yaml:"from_name"`
 }
 
 type FutaConfig struct {

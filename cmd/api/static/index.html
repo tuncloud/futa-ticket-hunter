@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FutaHunter — Săn Vé Phương Trang</title>
+<title>FutaHunter — San Ve Phuong Trang</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -21,230 +21,124 @@
   --shadow-md:0 4px 12px rgba(0,0,0,0.07);
   --shadow-lg:0 8px 30px rgba(0,0,0,0.08);
   --radius:12px;--radius-sm:8px;--radius-xs:6px;
-  --sidebar-w:250px;--header-h:64px;
   --font:'Lexend',system-ui,-apple-system,sans-serif;
 }
 html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;overflow:hidden;height:100vh}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
 input,button,select,textarea{font-family:inherit}
 
-/* ===== LAYOUT ===== */
-.app{display:flex;height:100vh}
-
-/* ===== SIDEBAR ===== */
-.sidebar{
-  width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;
-  background:var(--white);border-right:1px solid var(--border-light);
-  display:flex;flex-direction:column;z-index:20;
-  position:relative;
-}
-.sidebar-logo{
-  padding:20px 24px;display:flex;align-items:center;gap:10px;
-  border-bottom:1px solid var(--border-light);
-}
-.logo-mark{
-  width:36px;height:36px;border-radius:10px;
-  background:linear-gradient(135deg,var(--orange),#FF6B35);
-  display:grid;place-items:center;flex-shrink:0;
-}
-.logo-mark svg{width:20px;height:20px;fill:#fff}
-.logo-text{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
-.logo-text span{color:var(--orange)}
-
-.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:2px}
-.nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;border-radius:var(--radius-sm);
-  color:var(--text2);font-size:14px;font-weight:500;
-  cursor:pointer;transition:all .2s;border:none;background:none;
-  width:100%;text-align:left;
-}
-.nav-item:hover{background:var(--bg);color:var(--text)}
-.nav-item.active{background:var(--orange);color:#fff}
-.nav-item.active svg{fill:#fff;opacity:1}
-.nav-item svg{width:20px;height:20px;fill:var(--text3);opacity:.7;flex-shrink:0;transition:all .2s}
-.nav-item:hover svg{fill:var(--text);opacity:.9}
-
-.sidebar-footer{
-  padding:16px;border-top:1px solid var(--border-light);
-  display:flex;align-items:center;gap:10px;
-}
-.avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:var(--orange-light);color:var(--orange);
-  display:grid;place-items:center;font-size:14px;font-weight:700;flex-shrink:0;
-}
-.sidebar-user{flex:1;min-width:0}
-.sidebar-user-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-user-logout{font-size:12px;color:var(--orange);cursor:pointer;border:none;background:none;padding:0;font-family:inherit;font-weight:500}
-.sidebar-user-logout:hover{text-decoration:underline}
-
-/* ===== MAIN ===== */
-.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
-
 /* ===== HEADER ===== */
-.header{
-  height:var(--header-h);min-height:var(--header-h);
+.top-header{
   background:var(--white);border-bottom:1px solid var(--border-light);
-  display:flex;align-items:center;gap:16px;padding:0 28px;
+  padding:0 24px;display:flex;align-items:center;height:60px;
+  position:sticky;top:0;z-index:50;
 }
-.header-title{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap}
-.header-search{
-  flex:1;max-width:400px;position:relative;margin-left:16px;
-}
-.header-search input{
-  width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);
-  border-radius:var(--radius-sm);font-size:13px;color:var(--text);
-  background:var(--bg);outline:none;transition:all .2s;
-}
-.header-search input:focus{border-color:var(--orange);background:var(--white);box-shadow:0 0 0 3px var(--orange-soft)}
-.header-search input::placeholder{color:var(--text3)}
-.header-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:var(--text3)}
-.header-spacer{flex:1}
-.header-actions{display:flex;align-items:center;gap:8px}
-.btn-icon{
-  width:38px;height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);
-  background:var(--white);cursor:pointer;display:grid;place-items:center;
-  transition:all .15s;position:relative;
-}
-.btn-icon:hover{background:var(--bg);border-color:#ccc}
-.btn-icon svg{width:18px;height:18px;fill:var(--text2)}
-.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--white)}
-.btn-primary{
-  padding:9px 20px;border:none;border-radius:var(--radius-sm);
-  background:var(--orange);color:#fff;font-size:13px;font-weight:600;
-  cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;
-  white-space:nowrap;
-}
-.btn-primary:hover{background:#D03A15;box-shadow:var(--shadow)}
-.btn-primary:active{transform:scale(.97)}
-.btn-primary svg{width:16px;height:16px;fill:#fff}
-
-/* ===== CONTENT ===== */
-.content{flex:1;overflow-y:auto;padding:28px;scroll-behavior:smooth}
-.page{display:none;animation:pageIn .35s ease}
-.page.active{display:block}
-@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-/* ===== DASHBOARD ===== */
-.welcome{display:flex;align-items:center;gap:16px;margin-bottom:24px}
-.welcome-avatar{
-  width:52px;height:52px;border-radius:50%;
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-mark{
+  width:34px;height:34px;border-radius:9px;
   background:linear-gradient(135deg,var(--orange),#FF6B35);
-  color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700;flex-shrink:0;
-}
-.welcome-text h2{font-size:20px;font-weight:700;color:var(--text)}
-.welcome-text p{font-size:13px;color:var(--text2);margin-top:2px}
-.welcome-text .active-count{color:var(--orange);font-weight:600}
-
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.stat-card{
-  background:var(--white);border-radius:var(--radius);padding:20px;
-  box-shadow:var(--shadow);border:1px solid var(--border-light);
-  display:flex;align-items:center;gap:14px;
-  transition:all .2s;cursor:default;
-}
-.stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.stat-icon{
-  width:44px;height:44px;border-radius:var(--radius-sm);
   display:grid;place-items:center;flex-shrink:0;
 }
-.stat-icon svg{width:22px;height:22px}
-.stat-icon.orange{background:var(--orange-light)}.stat-icon.orange svg{fill:var(--orange)}
-.stat-icon.green{background:var(--green-light)}.stat-icon.green svg{fill:var(--green)}
-.stat-icon.red{background:var(--red-light)}.stat-icon.red svg{fill:var(--red)}
-.stat-icon.blue{background:var(--blue-light)}.stat-icon.blue svg{fill:var(--blue)}
-.stat-info{min-width:0}
-.stat-value{font-size:24px;font-weight:700;color:var(--text);line-height:1.2}
-.stat-label{font-size:12px;color:var(--text3);font-weight:500}
-
-.dash-grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
-.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border-light)}
-.card-header{padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between}
-.card-header h3{font-size:14px;font-weight:700;color:var(--text)}
-.card-body{padding:16px 20px}
-
-.recent-item{
-  display:flex;align-items:center;gap:12px;padding:10px 0;
-  border-bottom:1px solid var(--border-light);
+.logo-mark svg{width:18px;height:18px;fill:#fff}
+.logo-text{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+.logo-text span{color:var(--orange)}
+.nav-spacer{flex:1}
+.nav-tabs{display:flex;gap:4px;margin:0 24px}
+.nav-tab{
+  padding:8px 20px;border:none;border-radius:var(--radius-sm);
+  background:transparent;font-size:13px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all .15s;
 }
-.recent-item:last-child{border-bottom:none}
-.recent-route-icon{
-  width:36px;height:36px;border-radius:var(--radius-xs);
-  background:var(--orange-light);display:grid;place-items:center;flex-shrink:0;
+.nav-tab:hover{background:var(--bg)}
+.nav-tab.active{background:var(--orange);color:#fff}
+.phone-display{
+  font-size:12px;color:var(--text2);padding:6px 12px;
+  background:var(--bg);border-radius:var(--radius-xs);
+  display:flex;align-items:center;gap:6px;
 }
-.recent-route-icon svg{width:18px;height:18px;fill:var(--orange)}
-.recent-info{flex:1;min-width:0}
-.recent-route{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recent-date{font-size:11px;color:var(--text3)}
-.badge{
-  font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
-  white-space:nowrap;
+.phone-display svg{width:14px;height:14px;fill:var(--text3)}
+
+/* ===== CONTAINER ===== */
+.container{max-width:800px;margin:0 auto;padding:28px 20px}
+
+/* ===== HERO SECTION ===== */
+.hero{
+  background:linear-gradient(135deg,var(--orange) 0%,#FF6B35 100%);
+  border-radius:var(--radius);padding:32px;margin-bottom:24px;
+  color:#fff;text-align:center;
 }
-.badge.pending{background:#FFF7ED;color:#C2410C}
-.badge.searching{background:var(--yellow-light);color:var(--yellow);animation:blink 2s ease-in-out infinite}
-.badge.found{background:var(--blue-light);color:var(--blue)}
-.badge.booking{background:var(--blue-light);color:var(--blue)}
-.badge.success{background:var(--green-light);color:var(--green)}
-.badge.failed{background:var(--red-light);color:var(--red)}
-.badge.cancelled{background:#F3F4F6;color:#6B7280}
-@keyframes blink{50%{opacity:.6}}
+.hero h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.hero p{font-size:13px;opacity:.85}
 
-.quick-actions{display:flex;flex-direction:column;gap:8px}
-.quick-btn{
-  display:flex;align-items:center;gap:10px;padding:12px 16px;
-  border:1px solid var(--border);border-radius:var(--radius-sm);
-  background:var(--white);cursor:pointer;transition:all .15s;
-  font-size:13px;font-weight:500;color:var(--text);
+/* ===== FORM CARD ===== */
+.form-card{
+  background:var(--white);border-radius:var(--radius);
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  padding:24px;margin-bottom:20px;
 }
-.quick-btn:hover{background:var(--bg);border-color:#ccc}
-.quick-btn svg{width:18px;height:18px;fill:var(--orange)}
-
-.popular-routes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.pop-route{
-  padding:10px 12px;border-radius:var(--radius-xs);background:var(--bg);
-  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;
-  transition:all .15s;display:flex;align-items:center;gap:6px;
+.form-card-title{
+  font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
 }
-.pop-route:hover{background:var(--orange-light);color:var(--orange)}
-.pop-route svg{width:14px;height:14px;fill:var(--text3);flex-shrink:0}
-
-/* ===== FORM PAGE ===== */
-.page-header{margin-bottom:24px}
-.page-header h2{font-size:20px;font-weight:700;color:var(--text)}
-.page-header p{font-size:13px;color:var(--text2);margin-top:2px}
-
-.form-sections{display:flex;flex-direction:column;gap:20px;max-width:720px}
-.form-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border-light);padding:24px}
-.form-card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .form-card-title svg{width:18px;height:18px;fill:var(--orange)}
 
-.route-inputs{display:flex;align-items:center;gap:12px}
+/* ===== ROUTE INPUTS WITH AUTOCOMPLETE ===== */
+.route-inputs{display:flex;align-items:flex-start;gap:12px}
 .route-inputs .fi{flex:1}
 .swap-btn{
   width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
   background:var(--white);cursor:pointer;display:grid;place-items:center;
-  transition:all .2s;flex-shrink:0;
+  transition:all .2s;flex-shrink:0;margin-top:24px;
 }
 .swap-btn:hover{background:var(--orange);border-color:var(--orange)}
 .swap-btn:hover svg{fill:#fff}
 .swap-btn svg{width:16px;height:16px;fill:var(--text3);transition:all .2s}
 
-.fi{display:flex;flex-direction:column;gap:5px}
+.fi{display:flex;flex-direction:column;gap:5px;position:relative}
 .fi label{font-size:12px;font-weight:600;color:var(--text2)}
 .fi label .req{color:var(--red);margin-left:2px}
-.fi input,.fi select,.fi textarea{
+.fi input,.fi select{
   padding:10px 12px;border:1px solid var(--border);
   border-radius:var(--radius-xs);font-size:14px;color:var(--text);
   outline:none;transition:all .2s;background:var(--white);width:100%;
 }
-.fi input:focus,.fi select:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+.fi input:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
 .fi input::placeholder{color:var(--text3)}
 
-.time-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end}
-.allday-toggle{display:flex;align-items:center;gap:8px;padding-bottom:4px}
-.allday-toggle span{font-size:13px;color:var(--text2)}
+/* Autocomplete dropdown */
+.ac-dropdown{
+  position:absolute;top:100%;left:0;right:0;z-index:100;
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);
+  max-height:280px;overflow-y:auto;display:none;margin-top:4px;
+}
+.ac-dropdown.show{display:block}
+.ac-section{padding:4px 0}
+.ac-section-title{
+  padding:6px 14px;font-size:11px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.ac-item{
+  padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);
+  display:flex;align-items:center;gap:10px;transition:background .1s;
+}
+.ac-item:hover{background:var(--orange-light)}
+.ac-item svg{width:16px;height:16px;fill:var(--text3);flex-shrink:0}
+.ac-item-name{font-weight:500}
+.ac-item-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.ac-empty{padding:16px;text-align:center;font-size:13px;color:var(--text3)}
 
+/* ===== TIME ROW ===== */
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.fi select{
+  padding:10px 12px;border:1px solid var(--border);
+  border-radius:var(--radius-xs);font-size:14px;color:var(--text);
+  outline:none;transition:all .2s;background:var(--white);width:100%;
+  cursor:pointer;
+}
+.fi select:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+
+/* ===== SEAT ===== */
 .seat-types{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .seat-type-btn{
   padding:8px 18px;border:1px solid var(--border);border-radius:var(--radius-xs);
@@ -262,12 +156,13 @@ input,button,select,textarea{font-family:inherit}
   display:grid;place-items:center;
 }
 .seat-counter button:hover{background:var(--orange-light);color:var(--orange)}
-.seat-counter button:active{transform:scale(.9)}
 .seat-counter .val{width:40px;text-align:center;font-size:16px;font-weight:700;color:var(--text)}
 
+/* ===== PASSENGER ===== */
 .passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.passenger-grid .fi:first-child{grid-column:1/-1}
+.passenger-grid .fi:last-child{grid-column:1/-1}
 
+/* ===== TOGGLE ===== */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
 .toggle-row .label{font-size:14px;font-weight:500;color:var(--text)}
 .toggle-row .desc{font-size:12px;color:var(--text3)}
@@ -284,6 +179,7 @@ input,button,select,textarea{font-family:inherit}
 }
 .toggle.on::after{left:22px}
 
+/* ===== SUBMIT ===== */
 .btn-submit{
   width:100%;padding:14px;border:none;border-radius:var(--radius-sm);
   background:var(--orange);color:#fff;font-size:15px;font-weight:700;
@@ -297,7 +193,31 @@ input,button,select,textarea{font-family:inherit}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .5s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ===== LIST PAGE ===== */
+/* ===== POPULAR ROUTES ===== */
+.popular-routes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.pop-route{
+  padding:10px 12px;border-radius:var(--radius-xs);background:var(--bg);
+  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:6px;border:1px solid transparent;
+}
+.pop-route:hover{background:var(--orange-light);color:var(--orange);border-color:var(--orange-soft)}
+.pop-route svg{width:14px;height:14px;fill:var(--text3);flex-shrink:0}
+
+/* ===== TICKETS VIEW ===== */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;
+}
+.stat-card{
+  background:var(--white);border-radius:var(--radius);padding:16px;
+  box-shadow:var(--shadow);border:1px solid var(--border-light);
+  text-align:center;
+}
+.stat-value{font-size:22px;font-weight:700;color:var(--text);line-height:1.2}
+.stat-label{font-size:11px;color:var(--text3);font-weight:500;margin-top:2px}
+.stat-card.orange .stat-value{color:var(--orange)}
+.stat-card.green .stat-value{color:var(--green)}
+.stat-card.red .stat-value{color:var(--red)}
+
 .list-toolbar{
   display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;
 }
@@ -309,18 +229,7 @@ input,button,select,textarea{font-family:inherit}
 }
 .filter-tab:hover{background:var(--bg)}
 .filter-tab.active{background:var(--orange);color:#fff}
-.filter-tab .cnt{font-size:11px;opacity:.7;margin-left:3px}
 .list-spacer{flex:1}
-.list-search{
-  position:relative;
-}
-.list-search input{
-  padding:8px 12px 8px 34px;border:1px solid var(--border);
-  border-radius:var(--radius-xs);font-size:13px;background:var(--white);
-  outline:none;width:200px;transition:all .2s;color:var(--text);
-}
-.list-search input:focus{border-color:var(--orange);width:260px}
-.list-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;fill:var(--text3)}
 
 .ticket-list{display:flex;flex-direction:column;gap:12px}
 .ticket-card{
@@ -382,36 +291,18 @@ input,button,select,textarea{font-family:inherit}
 .empty-state svg{width:48px;height:48px;fill:var(--border);margin-bottom:12px}
 .empty-state p{font-size:14px}
 
-/* ===== PROFILE PAGE ===== */
-.profile-grid{display:flex;flex-direction:column;gap:20px;max-width:640px}
-.profile-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border-light);padding:24px}
-.profile-card h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.profile-card h3 svg{width:18px;height:18px;fill:var(--orange)}
-.profile-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.profile-form .fi.full{grid-column:1/-1}
-
-.token-validate{display:flex;gap:8px;align-items:end}
-.token-validate .fi{flex:1}
-.btn-validate{
-  padding:10px 20px;border:1px solid var(--orange);border-radius:var(--radius-xs);
-  background:var(--orange-light);color:var(--orange);font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .15s;white-space:nowrap;height:41px;
+.badge{
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;
 }
-.btn-validate:hover{background:var(--orange);color:#fff}
-.token-result{
-  margin-top:10px;padding:10px 14px;border-radius:var(--radius-xs);
-  font-size:13px;display:none;
-}
-.token-result.show{display:block}
-.token-result.ok{background:var(--green-light);color:var(--green)}
-.token-result.err{background:var(--red-light);color:var(--red)}
-
-.btn-save{
-  padding:11px 28px;border:none;border-radius:var(--radius-sm);
-  background:var(--orange);color:#fff;font-size:14px;font-weight:600;
-  cursor:pointer;transition:all .15s;margin-top:4px;
-}
-.btn-save:hover{background:#D03A15}
+.badge.pending{background:#FFF7ED;color:#C2410C}
+.badge.searching{background:var(--yellow-light);color:var(--yellow);animation:blink 2s ease-in-out infinite}
+.badge.found{background:var(--blue-light);color:var(--blue)}
+.badge.booking{background:var(--blue-light);color:var(--blue)}
+.badge.success{background:var(--green-light);color:var(--green)}
+.badge.failed{background:var(--red-light);color:var(--red)}
+.badge.cancelled{background:#F3F4F6;color:#6B7280}
+.badge.expired{background:#FEF3C7;color:#D97706}
+@keyframes blink{50%{opacity:.6}}
 
 /* ===== TOAST ===== */
 .toasts{position:fixed;top:16px;right:16px;z-index:100;display:flex;flex-direction:column;gap:8px}
@@ -427,325 +318,209 @@ input,button,select,textarea{font-family:inherit}
 @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
 
-/* ===== MOBILE ===== */
-.mobile-toggle{display:none;width:40px;height:40px;border:none;background:none;cursor:pointer;padding:8px}
-.mobile-toggle svg{width:24px;height:24px;fill:var(--text)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:15}
-
-@media(max-width:900px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .dash-grid{grid-template-columns:1fr}
+/* ===== RECENT SECTION ===== */
+.recent-section{margin-top:24px}
+.recent-section h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px}
+.recent-item{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  background:var(--white);border-radius:var(--radius-sm);
+  border:1px solid var(--border-light);margin-bottom:8px;
+  transition:all .15s;
 }
+.recent-item:hover{box-shadow:var(--shadow)}
+.recent-route-icon{
+  width:34px;height:34px;border-radius:var(--radius-xs);
+  background:var(--orange-light);display:grid;place-items:center;flex-shrink:0;
+}
+.recent-route-icon svg{width:16px;height:16px;fill:var(--orange)}
+.recent-info{flex:1;min-width:0}
+.recent-route{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-date{font-size:11px;color:var(--text3)}
+
+/* ===== RESPONSIVE ===== */
 @media(max-width:768px){
-  .sidebar{position:fixed;left:-260px;transition:left .3s ease;z-index:20;box-shadow:var(--shadow-lg)}
-  .sidebar.open{left:0}
-  .sidebar-overlay.show{display:block;z-index:15}
-  .mobile-toggle{display:block}
-  .content{padding:20px 16px}
-  .stats-row{grid-template-columns:1fr 1fr}
+  .container{padding:16px 12px}
   .route-inputs{flex-direction:column}
-  .swap-btn{transform:rotate(90deg)}
+  .swap-btn{transform:rotate(90deg);margin-top:0;align-self:center}
   .time-row{grid-template-columns:1fr 1fr}
   .passenger-grid{grid-template-columns:1fr}
-  .header-search{display:none}
-  .tc-details{gap:12px}
-  .popular-routes{grid-template-columns:1fr}
+  .popular-routes{grid-template-columns:1fr 1fr}
+  .stats-bar{grid-template-columns:1fr 1fr}
+  .hero{padding:24px 16px}
+  .nav-tabs{margin:0 8px}
 }
 @media(max-width:480px){
-  .stats-row{grid-template-columns:1fr}
-  .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .time-row{grid-template-columns:1fr}
+  .popular-routes{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:1fr 1fr}
+  .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
 </style>
 </head>
 <body>
 
-<div class="app">
-  <!-- SIDEBAR -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M17 20H7V4h10v16zm-3-2h1v-2h-1v2zm-4 0h1v-2H10v2zM5 20v2h14v-2H5zM17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg></div>
-      <div class="logo-text">Futa<span>Hunter</span></div>
-    </div>
-    <nav class="sidebar-nav">
-      <button class="nav-item active" data-page="dashboard">
-        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-        Tổng quan
-      </button>
-      <button class="nav-item" data-page="create">
-        <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
-        Săn vé
-      </button>
-      <button class="nav-item" data-page="list">
-        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-        Danh sách vé
-      </button>
-      <button class="nav-item" data-page="profile">
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        Hồ sơ
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="avatar" id="sidebarAvatar">?</div>
-      <div class="sidebar-user">
-        <div class="sidebar-user-name" id="sidebarName">Chưa đăng nhập</div>
-        <button class="sidebar-user-logout" id="logoutBtn">Đăng xuất</button>
-      </div>
-    </div>
-  </aside>
+<!-- TOP HEADER -->
+<header class="top-header">
+  <div class="logo" id="logoBtn">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M17 20H7V4h10v16zm-3-2h1v-2h-1v2zm-4 0h1v-2H10v2zM5 20v2h14v-2H5zM17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg></div>
+    <div class="logo-text">Futa<span>Hunter</span></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-view="search">Trang chu</button>
+    <button class="nav-tab" data-view="tickets">Ve cua toi</button>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="phone-display" id="emailDisplay" style="display:none">
+    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    <span id="emailText"></span>
+  </div>
+</header>
 
-  <!-- MAIN -->
-  <div class="main">
-    <header class="header">
-      <button class="mobile-toggle" id="mobileToggle"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
-      <div class="header-title">FutaHunter</div>
-      <div class="header-search">
+<div class="container">
+  <!-- ===== SEARCH VIEW ===== -->
+  <div id="viewSearch">
+    <div class="hero">
+      <h1>San ve xe Phuong Trang</h1>
+      <p>Tu dong tim va dat ve khi co cho trong</p>
+    </div>
+
+    <form id="createForm">
+      <!-- Route -->
+      <div class="form-card">
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Lo trinh</div>
+        <div class="route-inputs">
+          <div class="fi">
+            <label>Diem xuat phat <span class="req">*</span></label>
+            <input type="text" id="fOrigin" placeholder="VD: TP Ho Chi Minh" autocomplete="off" required>
+            <div class="ac-dropdown" id="acOrigin"></div>
+          </div>
+          <button type="button" class="swap-btn" id="swapBtn" title="Doi chieu"><svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></button>
+          <div class="fi">
+            <label>Diem den <span class="req">*</span></label>
+            <input type="text" id="fDest" placeholder="VD: Da Lat" autocomplete="off" required>
+            <div class="ac-dropdown" id="acDest"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time -->
+      <div class="form-card">
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>Thoi gian</div>
+        <div class="time-row">
+          <div class="fi">
+            <label>Ngay di <span class="req">*</span></label>
+            <input type="date" id="fDate" required>
+          </div>
+          <div class="fi">
+            <label>Khung gio</label>
+            <select id="fTimeSlot">
+              <option value="00:00-23:59">Ca ngay (00:00 - 23:59)</option>
+              <option value="00:00-06:00">Sang som (00:00 - 06:00)</option>
+              <option value="06:00-12:00">Buoi sang (06:00 - 12:00)</option>
+              <option value="12:00-18:00">Buoi chieu (12:00 - 18:00)</option>
+              <option value="18:00-23:59">Buoi toi (18:00 - 24:00)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seat -->
+      <div class="form-card">
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M4 18v3h3v-3h10v3h3v-3h1v-3H3v3h1zm15-8h-2V7h-2V2H9v5H7v3H5c-1.1 0-2 .9-2 2v2h18v-2c0-1.1-.9-2-2-2z"/></svg>Loai ghe & So luong</div>
+        <div class="seat-types">
+          <button type="button" class="seat-type-btn active" data-type="any">Tat ca</button>
+          <button type="button" class="seat-type-btn" data-type="giuong_nam">Giuong nam</button>
+          <button type="button" class="seat-type-btn" data-type="ghe_ngoi">Ghe ngoi</button>
+        </div>
+        <div class="seat-count-row">
+          <label>So luong ghe:</label>
+          <div class="seat-counter">
+            <button type="button" id="seatMinus">-</button>
+            <div class="val" id="seatVal">1</div>
+            <button type="button" id="seatPlus">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Passenger -->
+      <div class="form-card">
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Thong tin hanh khach</div>
+        <div class="passenger-grid">
+          <div class="fi">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" id="fEmail" placeholder="email@example.com" required>
+          </div>
+          <div class="fi">
+            <label>Ho va ten <span class="req">*</span></label>
+            <input type="text" id="fName" placeholder="Nguyen Van A" required>
+          </div>
+          <div class="fi">
+            <label>So dien thoai <span class="req">*</span></label>
+            <input type="tel" id="fPhone" placeholder="0912 345 678" required>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:8px">Link thanh toan se duoc gui qua email sau khi tim thay ve</p>
+      </div>
+
+      <!-- Options -->
+      <div class="form-card">
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Tuy chon</div>
+        <div class="toggle-row">
+          <div><div class="label">Tu dong dat ve</div><div class="desc">He thong se tu dong dat ve khi tim thay</div></div>
+          <button type="button" class="toggle on" id="autoBookToggle"></button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        <input type="text" placeholder="Tìm kiếm tuyến xe...">
+        Tim chuyen xe
+      </button>
+    </form>
+
+    <!-- Popular routes -->
+    <div class="form-card" style="margin-top:20px">
+      <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Tuyen pho bien</div>
+      <div class="popular-routes">
+        <div class="pop-route" data-oid="1" data-oname="TP. Ho Chi Minh" data-did="2" data-dname="Lam Dong"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>HCM → Da Lat</div>
+        <div class="pop-route" data-oid="1" data-oname="TP. Ho Chi Minh" data-did="79" data-dname="Khanh Hoa"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>HCM → Nha Trang</div>
+        <div class="pop-route" data-oid="1" data-oname="TP. Ho Chi Minh" data-did="109" data-dname="Ba Ria - Vung Tau"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>HCM → Vung Tau</div>
+        <div class="pop-route" data-oid="1" data-oname="TP. Ho Chi Minh" data-did="115" data-dname="Can Tho"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>HCM → Can Tho</div>
+        <div class="pop-route" data-oid="2" data-oname="Lam Dong" data-did="1" data-dname="TP. Ho Chi Minh"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>Da Lat → HCM</div>
+        <div class="pop-route" data-oid="47" data-oname="Da Nang" data-did="1" data-dname="TP. Ho Chi Minh"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>Da Nang → HCM</div>
       </div>
-      <div class="header-spacer"></div>
-      <div class="header-actions">
-        <button class="btn-icon" title="Thông báo">
-          <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-          <span class="notif-dot" id="notifDot" style="display:none"></span>
-        </button>
-        <button class="btn-primary" id="headerCreateBtn">
-          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-          Săn vé mới
-        </button>
+    </div>
+
+    <!-- Recent -->
+    <div class="recent-section" id="recentSection" style="display:none">
+      <h3>Yeu cau gan day</h3>
+      <div id="recentList"></div>
+    </div>
+  </div>
+
+  <!-- ===== TICKETS VIEW ===== -->
+  <div id="viewTickets" style="display:none">
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card orange"><div class="stat-value" id="statActive">0</div><div class="stat-label">Dang xu ly</div></div>
+      <div class="stat-card green"><div class="stat-value" id="statSuccess">0</div><div class="stat-label">Thanh cong</div></div>
+      <div class="stat-card red"><div class="stat-value" id="statFailed">0</div><div class="stat-label">That bai</div></div>
+      <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Tong</div></div>
+    </div>
+
+    <div class="list-toolbar">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">Tat ca</button>
+        <button class="filter-tab" data-filter="active">Dang xu ly</button>
+        <button class="filter-tab" data-filter="success">Thanh cong</button>
+        <button class="filter-tab" data-filter="failed">That bai</button>
       </div>
-    </header>
+      <div class="list-spacer"></div>
+      <button class="nav-tab" id="ticketCreateBtn" style="background:var(--orange);color:#fff;font-size:12px;padding:7px 14px">+ Tao yeu cau</button>
+    </div>
 
-    <div class="content">
-      <!-- DASHBOARD -->
-      <div class="page active" id="pageDashboard">
-        <div class="welcome">
-          <div class="welcome-avatar" id="dashAvatar">?</div>
-          <div class="welcome-text">
-            <h2 id="dashWelcome">Chào bạn!</h2>
-            <p>Bạn đang có <span class="active-count" id="dashActiveCount">0</span> yêu cầu săn vé đang chạy</p>
-          </div>
-        </div>
-
-        <div class="stats-row" id="statsRow">
-          <div class="stat-card">
-            <div class="stat-icon orange"><svg viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg></div>
-            <div class="stat-info"><div class="stat-value" id="statActive">0</div><div class="stat-label">Đang xử lý</div></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon green"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-            <div class="stat-info"><div class="stat-value" id="statSuccess">0</div><div class="stat-label">Thành công</div></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon red"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div>
-            <div class="stat-info"><div class="stat-value" id="statFailed">0</div><div class="stat-label">Thất bại</div></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon blue"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
-            <div class="stat-info"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Tổng yêu cầu</div></div>
-          </div>
-        </div>
-
-        <div class="dash-grid">
-          <div class="card">
-            <div class="card-header"><h3>Yêu cầu săn vé gần đây</h3></div>
-            <div class="card-body" id="recentList">
-              <div class="empty-state"><p>Chưa có yêu cầu nào</p></div>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:20px">
-            <div class="card">
-              <div class="card-header"><h3>Thao tác nhanh</h3></div>
-              <div class="card-body">
-                <div class="quick-actions">
-                  <button class="quick-btn" id="quickCreate">
-                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                    Tạo yêu cầu mới
-                  </button>
-                  <button class="quick-btn" id="quickSettings">
-                    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-                    Cài đặt thông báo
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-header"><h3>Tuyến phổ biến</h3></div>
-              <div class="card-body">
-                <div class="popular-routes">
-                  <div class="pop-route" data-origin="TP Hồ Chí Minh" data-dest="Đà Lạt"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>HCM → Đà Lạt</div>
-                  <div class="pop-route" data-origin="TP Hồ Chí Minh" data-dest="Nha Trang"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>HCM → Nha Trang</div>
-                  <div class="pop-route" data-origin="Hà Nội" data-dest="Đà Nẵng"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Hà Nội → Đà Nẵng</div>
-                  <div class="pop-route" data-origin="TP Hồ Chí Minh" data-dest="Vũng Tàu"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>HCM → Vũng Tàu</div>
-                  <div class="pop-route" data-origin="TP Hồ Chí Minh" data-dest="Cần Thơ"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>HCM → Cần Thơ</div>
-                  <div class="pop-route" data-origin="Đà Nẵng" data-dest="TP Hồ Chí Minh"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Đà Nẵng → HCM</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CREATE PAGE -->
-      <div class="page" id="pageCreate">
-        <div class="page-header">
-          <h2>Tạo yêu cầu săn vé</h2>
-          <p>Nhập thông tin lộ trình và hành khách, hệ thống sẽ tự động tìm vé cho bạn</p>
-        </div>
-        <form id="createForm" class="form-sections">
-          <div class="form-card">
-            <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Lộ trình</div>
-            <div class="route-inputs">
-              <div class="fi">
-                <label>Điểm xuất phát <span class="req">*</span></label>
-                <input type="text" id="fOrigin" placeholder="VD: TP Hồ Chí Minh" required>
-              </div>
-              <button type="button" class="swap-btn" id="swapBtn" title="Đổi chiều"><svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></button>
-              <div class="fi">
-                <label>Điểm đến <span class="req">*</span></label>
-                <input type="text" id="fDest" placeholder="VD: Đà Lạt" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-card">
-            <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>Thời gian</div>
-            <div class="time-row">
-              <div class="fi">
-                <label>Ngày đi <span class="req">*</span></label>
-                <input type="date" id="fDate" required>
-              </div>
-              <div class="fi">
-                <label>Từ giờ</label>
-                <input type="time" id="fTimeFrom" value="00:00">
-              </div>
-              <div class="fi">
-                <label>Đến giờ</label>
-                <input type="time" id="fTimeTo" value="23:59">
-              </div>
-            </div>
-            <div class="allday-toggle" style="margin-top:10px">
-              <button type="button" class="toggle on" id="alldayToggle"></button>
-              <span>Cả ngày</span>
-            </div>
-          </div>
-
-          <div class="form-card">
-            <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M4 18v3h3v-3h10v3h3v-3h1v-3H3v3h1zm15-8h-2V7h-2V2H9v5H7v3H5c-1.1 0-2 .9-2 2v2h18v-2c0-1.1-.9-2-2-2z"/></svg>Loại ghế & Số lượng</div>
-            <div class="seat-types">
-              <button type="button" class="seat-type-btn active" data-type="any">Tất cả</button>
-              <button type="button" class="seat-type-btn" data-type="giuong_nam">Giường nằm</button>
-              <button type="button" class="seat-type-btn" data-type="ghe_ngoi">Ghế ngồi</button>
-            </div>
-            <div class="seat-count-row">
-              <label>Số lượng ghế:</label>
-              <div class="seat-counter">
-                <button type="button" id="seatMinus">−</button>
-                <div class="val" id="seatVal">1</div>
-                <button type="button" id="seatPlus">+</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-card">
-            <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Thông tin hành khách</div>
-            <div class="passenger-grid">
-              <div class="fi">
-                <label>Họ và tên <span class="req">*</span></label>
-                <input type="text" id="fName" placeholder="Nguyễn Văn A" required>
-              </div>
-              <div class="fi">
-                <label>Số điện thoại <span class="req">*</span></label>
-                <input type="tel" id="fPhone" placeholder="0912 345 678" required>
-              </div>
-              <div class="fi">
-                <label>Email</label>
-                <input type="email" id="fEmail" placeholder="email@example.com">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-card">
-            <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Tùy chọn</div>
-            <div class="toggle-row">
-              <div><div class="label">Tự động đặt vé</div><div class="desc">Hệ thống sẽ tự động đặt vé khi tìm thấy</div></div>
-              <button type="button" class="toggle on" id="autoBookToggle"></button>
-            </div>
-          </div>
-
-          <button type="submit" class="btn-submit" id="submitBtn">
-            <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
-            Bắt đầu săn vé
-          </button>
-        </form>
-      </div>
-
-      <!-- LIST PAGE -->
-      <div class="page" id="pageList">
-        <div class="page-header">
-          <h2>Danh sách vé</h2>
-          <p>Quản lý tất cả yêu cầu săn vé của bạn</p>
-        </div>
-        <div class="list-toolbar">
-          <div class="filter-tabs" id="filterTabs">
-            <button class="filter-tab active" data-filter="all">Tất cả</button>
-            <button class="filter-tab" data-filter="active">Đang xử lý</button>
-            <button class="filter-tab" data-filter="success">Thành công</button>
-            <button class="filter-tab" data-filter="failed">Thất bại</button>
-          </div>
-          <div class="list-spacer"></div>
-          <div class="list-search">
-            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <input type="text" placeholder="Tìm tuyến..." id="listSearchInput">
-          </div>
-          <button class="btn-primary" id="listCreateBtn"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Tạo yêu cầu</button>
-        </div>
-        <div class="ticket-list" id="ticketList">
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
-            <p>Chưa có yêu cầu nào</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- PROFILE PAGE -->
-      <div class="page" id="pageProfile">
-        <div class="page-header">
-          <h2>Hồ sơ & Cài đặt</h2>
-          <p>Quản lý thông tin cá nhân và cấu hình hệ thống</p>
-        </div>
-        <div class="profile-grid">
-          <div class="profile-card">
-            <h3><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Thông tin cá nhân</h3>
-            <div class="profile-form">
-              <div class="fi"><label>Họ và tên</label><input type="text" id="pName" placeholder="Nguyễn Văn A"></div>
-              <div class="fi"><label>Số điện thoại</label><input type="tel" id="pPhone" placeholder="0912 345 678"></div>
-              <div class="fi full"><label>Email</label><input type="email" id="pEmail" placeholder="email@example.com"></div>
-            </div>
-          </div>
-
-          <div class="profile-card">
-            <h3><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>Xác thực FUTA</h3>
-            <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Nhập Refresh Token từ tài khoản FUTA để săn vé với chế độ đăng nhập</p>
-            <div class="token-validate">
-              <div class="fi"><label>Refresh Token</label><input type="text" id="pToken" placeholder="AMf-vBy..."></div>
-              <button type="button" class="btn-validate" id="validateBtn">Xác thực</button>
-            </div>
-            <div class="token-result" id="tokenResult"></div>
-          </div>
-
-          <div class="profile-card">
-            <h3><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>Webhook</h3>
-            <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Nhận thông báo khi đặt vé thành công</p>
-            <div class="profile-form">
-              <div class="fi full"><label>Webhook URL</label><input type="url" id="pWebhookUrl" placeholder="https://hooks.example.com/notify"></div>
-              <div class="fi full"><label>Secret (HMAC-SHA256)</label><input type="text" id="pWebhookSecret" placeholder="your-secret-key"></div>
-            </div>
-          </div>
-
-          <button class="btn-save" id="saveSettingsBtn">Lưu cài đặt</button>
-        </div>
+    <div class="ticket-list" id="ticketList">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+        <p>Chua co yeu cau nao</p>
       </div>
     </div>
   </div>
@@ -757,363 +532,427 @@ input,button,select,textarea{font-family:inherit}
 (function(){
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 
+// ===== COOKIE HELPERS =====
+function getCookie(name){
+  const v=document.cookie.match('(^|;)\\s*'+name+'=([^;]*)');
+  return v?decodeURIComponent(v[2]):'';
+}
+function setCookie(name,value,days){
+  const d=new Date();d.setTime(d.getTime()+days*86400000);
+  document.cookie=name+'='+encodeURIComponent(value)+';expires='+d.toUTCString()+';path=/;SameSite=Strict';
+}
+
 // ===== STATE =====
-let currentPage='dashboard';
+let currentView='search';
 let seatCount=1;
 let seatType='any';
 let autoBook=true;
-let allDay=true;
 let currentFilter='all';
-let settings={};
-let refreshTimer;
-let searchTerm='';
+
+// Hidden area IDs from autocomplete selection
+let originAreaID='';
+let originName='';
+let destAreaID='';
+let destName='';
+
+// ===== INIT COOKIES =====
+const savedEmail=getCookie('futa_email');
+const savedName=getCookie('futa_name');
+const savedPhone=getCookie('futa_phone');
+if(savedEmail){
+  $('#fEmail').value=savedEmail;
+  $('#emailDisplay').style.display='flex';
+  $('#emailText').textContent=savedEmail;
+}
+if(savedName)$('#fName').value=savedName;
+if(savedPhone)$('#fPhone').value=savedPhone;
+
+// Save to cookie on change
+$('#fEmail').addEventListener('change',function(){
+  const v=this.value.trim();
+  if(v){setCookie('futa_email',v,365);$('#emailDisplay').style.display='flex';$('#emailText').textContent=v;}
+});
+$('#fName').addEventListener('change',function(){
+  const v=this.value.trim();if(v)setCookie('futa_name',v,365);
+});
+$('#fPhone').addEventListener('change',function(){
+  const v=this.value.trim();if(v)setCookie('futa_phone',v,365);
+});
 
 // ===== NAVIGATION =====
-function goTo(page){
-  currentPage=page;
-  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
-  $$('.page').forEach(p=>p.classList.remove('active'));
-  const el=$('#page'+page.charAt(0).toUpperCase()+page.slice(1));
-  if(el)el.classList.add('active');
-  if(page==='dashboard')loadDashboard();
-  if(page==='list')loadList();
-  if(page==='profile')loadSettings();
-  // close mobile sidebar
-  $('#sidebar').classList.remove('open');
-  $('#sidebarOverlay').classList.remove('show');
+function goToView(view){
+  currentView=view;
+  $$('.nav-tab[data-view]').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+  $('#viewSearch').style.display=view==='search'?'block':'none';
+  $('#viewTickets').style.display=view==='tickets'?'block':'none';
+  if(view==='tickets')loadTickets();
+  if(view==='search')loadRecent();
 }
 
-$$('.nav-item').forEach(n=>n.addEventListener('click',()=>goTo(n.dataset.page)));
-$('#headerCreateBtn').addEventListener('click',()=>goTo('create'));
-$('#listCreateBtn').addEventListener('click',()=>goTo('create'));
-$('#quickCreate').addEventListener('click',()=>goTo('create'));
-$('#quickSettings').addEventListener('click',()=>goTo('profile'));
+$$('.nav-tab[data-view]').forEach(t=>t.addEventListener('click',()=>goToView(t.dataset.view)));
+$('#logoBtn').addEventListener('click',()=>goToView('search'));
+$('#ticketCreateBtn').addEventListener('click',()=>goToView('search'));
 
-// Mobile
-$('#mobileToggle').addEventListener('click',()=>{
-  $('#sidebar').classList.add('open');$('#sidebarOverlay').classList.add('show');
-});
-$('#sidebarOverlay').addEventListener('click',()=>{
-  $('#sidebar').classList.remove('open');$('#sidebarOverlay').classList.remove('show');
-});
+// ===== AUTOCOMPLETE =====
+let acDebounce;
+function setupAutocomplete(inputEl,dropdownEl,setFn){
+  let selectedIndex=-1;
+  let items=[];
 
-// Popular routes
-$$('.pop-route').forEach(el=>el.addEventListener('click',()=>{
-  $('#fOrigin').value=el.dataset.origin;
-  $('#fDest').value=el.dataset.dest;
-  goTo('create');
-}));
-
-// ===== DASHBOARD =====
-async function loadDashboard(){
-  try{
-    const[statsResp,recentResp]=await Promise.all([fetch('/api/stats'),fetch('/api/schedules/recent')]);
-    const stats=await statsResp.json();
-    const recent=await recentResp.json();
-
-    const active=stats.pending+(stats.searching||0);
-    $('#statActive').textContent=active;
-    $('#statSuccess').textContent=stats.success;
-    $('#statFailed').textContent=stats.failed+(stats.cancelled||0);
-    $('#statTotal').textContent=stats.total;
-    $('#dashActiveCount').textContent=active;
-
-    // Notification dot
-    $('#notifDot').style.display=active>0?'block':'none';
-
-    renderRecent(recent);
-  }catch(e){console.error(e)}
-  updateUserDisplay();
-}
-
-function renderRecent(items){
-  const c=$('#recentList');
-  if(!items||items.length===0){
-    c.innerHTML='<div class="empty-state"><p>Chưa có yêu cầu nào</p></div>';
-    return;
-  }
-  c.innerHTML=items.map(s=>{
-    const st=statusInfo(s.status);
-    return `<div class="recent-item">
-      <div class="recent-route-icon"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg></div>
-      <div class="recent-info">
-        <div class="recent-route">${esc(s.origin_keyword)} → ${esc(s.dest_keyword)}</div>
-        <div class="recent-date">${formatDate(s.travel_date)} · ${esc(s.passenger_name)}</div>
-      </div>
-      <span class="badge ${s.status}">${st.label}</span>
-    </div>`;
-  }).join('');
-}
-
-// ===== LIST =====
-async function loadList(){
-  try{
-    const resp=await fetch('/api/schedules?status='+currentFilter);
-    const items=await resp.json();
-    renderTickets(items);
-  }catch(e){console.error(e)}
-}
-
-function renderTickets(items){
-  const c=$('#ticketList');
-  let filtered=items;
-  if(searchTerm){
-    const q=searchTerm.toLowerCase();
-    filtered=items.filter(s=>
-      s.origin_keyword.toLowerCase().includes(q)||
-      s.dest_keyword.toLowerCase().includes(q)||
-      s.passenger_name.toLowerCase().includes(q)
-    );
-  }
-  if(!filtered||filtered.length===0){
-    c.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg><p>Không tìm thấy yêu cầu nào</p></div>`;
-    return;
-  }
-  c.innerHTML=filtered.map((s,i)=>{
-    const st=statusInfo(s.status);
-    let successHtml='';
-    if(s.status==='success'&&s.booking_code){
-      successHtml=`<div class="tc-success">
-        <div class="tc-success-title">✓ Đặt vé thành công</div>
-        <div class="tc-success-grid">
-          <div class="tc-success-item"><span class="tc-success-label">Mã vé</span><span class="tc-success-value">${esc(s.booking_code)}</span></div>
-          <div class="tc-success-item"><span class="tc-success-label">Giá vé</span><span class="tc-success-value">${formatPrice(s.ticket_price)}</span></div>
-          <div class="tc-success-item"><span class="tc-success-label">Ghế</span><span class="tc-success-value">${esc(s.seat_name)||'—'}</span></div>
-          <div class="tc-success-item"><span class="tc-success-label">Khởi hành</span><span class="tc-success-value">${s.departure_time?formatDT(s.departure_time):'—'}</span></div>
-        </div>
-      </div>`;
-    }
-    let errorHtml='';
-    if(s.last_error&&s.status!=='success'){
-      errorHtml=`<div class="tc-error">⚠ ${esc(s.last_error)}</div>`;
-    }
-    const isActive=['pending','searching','found','booking'].includes(s.status);
-    return `<div class="ticket-card" style="animation-delay:${i*40}ms">
-      <div class="tc-top">
-        <div class="tc-route-icon"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg></div>
-        <div class="tc-route">
-          <div class="tc-route-name"><span>${esc(s.origin_keyword)}</span><span class="tc-route-arrow">→</span><span>${esc(s.dest_keyword)}</span></div>
-          <div class="tc-passenger">${esc(s.passenger_name)} · ${esc(s.passenger_phone)}</div>
-        </div>
-        <span class="badge ${s.status}">${st.label}</span>
-      </div>
-      <div class="tc-details">
-        <div class="tc-detail"><span class="tc-detail-label">Ngày đi</span><span class="tc-detail-value">${formatDate(s.travel_date)}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Khung giờ</span><span class="tc-detail-value">${s.time_from||'00:00'} - ${s.time_to||'23:59'}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Loại ghế</span><span class="tc-detail-value">${seatTypeLabel(s.seat_type)}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Số ghế</span><span class="tc-detail-value">${s.seat_count}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Lần thử</span><span class="tc-detail-value">${s.retry_count}</span></div>
-      </div>
-      ${successHtml}${errorHtml}
-      <div class="tc-actions">
-        ${isActive?`<button class="btn-sm danger" onclick="app.cancel('${s.id}')">Hủy</button>`:''}
-        <button class="btn-sm danger" onclick="app.remove('${s.id}')">Xóa</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// Filter tabs
-$$('.filter-tab').forEach(tab=>tab.addEventListener('click',()=>{
-  $$('.filter-tab').forEach(t=>t.classList.remove('active'));
-  tab.classList.add('active');
-  currentFilter=tab.dataset.filter;
-  loadList();
-}));
-
-// List search
-$('#listSearchInput').addEventListener('input',e=>{
-  searchTerm=e.target.value;
-  loadList();
-});
-
-// ===== PROFILE =====
-async function loadSettings(){
-  try{
-    const resp=await fetch('/api/settings');
-    settings=await resp.json();
-    $('#pName').value=settings.full_name||'';
-    $('#pPhone').value=settings.phone||'';
-    $('#pEmail').value=settings.email||'';
-    $('#pWebhookUrl').value=settings.webhook_url||'';
-    $('#pWebhookSecret').value=settings.webhook_secret||'';
-    if(settings.refresh_token&&settings.refresh_token.length>5){
-      $('#pToken').value=settings.refresh_token;
-    }
-    updateUserDisplay();
-  }catch(e){console.error(e)}
-}
-
-function updateUserDisplay(){
-  const name=settings.full_name||'Chưa đăng nhập';
-  const initial=settings.full_name?settings.full_name.charAt(0).toUpperCase():'?';
-  $('#sidebarName').textContent=name;
-  $('#sidebarAvatar').textContent=initial;
-  $('#dashAvatar').textContent=initial;
-  $('#dashWelcome').textContent=settings.full_name?`Chào ${settings.full_name}!`:'Chào bạn!';
-  // Auto-fill create form passenger info
-  if(settings.full_name&&!$('#fName').value)$('#fName').value=settings.full_name;
-  if(settings.phone&&!$('#fPhone').value)$('#fPhone').value=settings.phone;
-  if(settings.email&&!$('#fEmail').value)$('#fEmail').value=settings.email;
-}
-
-$('#validateBtn').addEventListener('click',async()=>{
-  const token=$('#pToken').value.trim();
-  if(!token){toast('Vui lòng nhập Refresh Token','error');return;}
-  const result=$('#tokenResult');
-  result.className='token-result';result.style.display='none';
-  try{
-    const resp=await fetch('/api/auth/validate-token',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({refresh_token:token})
-    });
-    const data=await resp.json();
-    if(resp.ok&&data.valid){
-      result.className='token-result show ok';
-      result.innerHTML=`✓ Xác thực thành công: <b>${esc(data.full_name)}</b> — ${esc(data.phone)}`;
-      $('#pName').value=data.full_name||'';
-      $('#pPhone').value=data.phone||'';
-    }else{
-      result.className='token-result show err';
-      result.textContent='✕ '+( data.error||'Token không hợp lệ');
-    }
-  }catch(e){
-    result.className='token-result show err';
-    result.textContent='✕ Lỗi kết nối';
-  }
-});
-
-$('#saveSettingsBtn').addEventListener('click',async()=>{
-  const body={
-    refresh_token:$('#pToken').value.trim(),
-    full_name:$('#pName').value.trim(),
-    phone:$('#pPhone').value.trim(),
-    email:$('#pEmail').value.trim(),
-    webhook_url:$('#pWebhookUrl').value.trim(),
-    webhook_secret:$('#pWebhookSecret').value.trim(),
-  };
-  try{
-    const resp=await fetch('/api/settings',{
-      method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
-    if(resp.ok){
-      toast('Đã lưu cài đặt');
-      settings={...settings,...body};
-      updateUserDisplay();
-    }else{
-      toast('Lỗi lưu cài đặt','error');
-    }
-  }catch(e){toast('Lỗi kết nối','error')}
-});
-
-$('#logoutBtn').addEventListener('click',async()=>{
-  if(!confirm('Xóa thông tin đăng nhập?'))return;
-  await fetch('/api/settings',{
-    method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({refresh_token:'',full_name:'',phone:'',email:'',webhook_url:settings.webhook_url||'',webhook_secret:settings.webhook_secret||''})
+  inputEl.addEventListener('input',()=>{
+    clearTimeout(acDebounce);
+    setFn('','');
+    const kw=inputEl.value.trim();
+    if(kw.length<2){dropdownEl.classList.remove('show');return;}
+    acDebounce=setTimeout(async()=>{
+      try{
+        const resp=await fetch('/api/search/pickup-points?keyword='+encodeURIComponent(kw));
+        const data=await resp.json();
+        renderAcDropdown(dropdownEl,data.areas||[],data.groups||[],setFn,inputEl);
+      }catch(e){console.error(e)}
+    },300);
   });
-  settings={};updateUserDisplay();
-  toast('Đã đăng xuất');
-});
 
-// ===== CREATE FORM =====
+  inputEl.addEventListener('focus',()=>{
+    if(dropdownEl.children.length>0&&!originAreaID&&!destAreaID){
+      // re-show if has content
+    }
+  });
+
+  inputEl.addEventListener('keydown',e=>{
+    if(!dropdownEl.classList.contains('show'))return;
+    items=dropdownEl.querySelectorAll('.ac-item');
+    if(e.key==='ArrowDown'){e.preventDefault();selectedIndex=Math.min(selectedIndex+1,items.length-1);highlightItem(items,selectedIndex);}
+    else if(e.key==='ArrowUp'){e.preventDefault();selectedIndex=Math.max(selectedIndex-1,0);highlightItem(items,selectedIndex);}
+    else if(e.key==='Enter'&&selectedIndex>=0){e.preventDefault();items[selectedIndex].click();}
+    else if(e.key==='Escape'){dropdownEl.classList.remove('show');}
+  });
+
+  document.addEventListener('click',e=>{
+    if(!inputEl.contains(e.target)&&!dropdownEl.contains(e.target)){
+      dropdownEl.classList.remove('show');
+    }
+  });
+}
+
+function highlightItem(items,idx){
+  items.forEach((it,i)=>it.style.background=i===idx?'var(--orange-light)':'');
+}
+
+function renderAcDropdown(dropdownEl,areas,groups,setFn,inputEl){
+  let html='';
+  if(areas.length>0){
+    html+='<div class="ac-section"><div class="ac-section-title">Khu vuc</div>';
+    areas.forEach(a=>{
+      html+=`<div class="ac-item" data-id="${esc(a.id)}" data-name="${esc(a.name)}">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+        <div><div class="ac-item-name">${esc(a.name)}</div></div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  if(groups.length>0){
+    html+='<div class="ac-section"><div class="ac-section-title">Diem don/tra</div>';
+    groups.forEach(g=>{
+      g.group&&g.group.forEach(p=>{
+        html+=`<div class="ac-item" data-id="${esc(p.provinceId||p.areaId)}" data-name="${esc(p.provinceName||g.provinceName)}">
+          <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+          <div>
+            <div class="ac-item-name">${esc(p.departmentName)}</div>
+            <div class="ac-item-sub">${esc(p.departmentAddress||g.districtName+', '+g.provinceName)}</div>
+          </div>
+        </div>`;
+      });
+    });
+    html+='</div>';
+  }
+  if(!html)html='<div class="ac-empty">Khong tim thay ket qua</div>';
+  dropdownEl.innerHTML=html;
+  dropdownEl.classList.add('show');
+
+  dropdownEl.querySelectorAll('.ac-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      setFn(item.dataset.id,item.dataset.name);
+      inputEl.value=item.dataset.name;
+      dropdownEl.classList.remove('show');
+    });
+  });
+}
+
+setupAutocomplete($('#fOrigin'),$('#acOrigin'),(id,name)=>{originAreaID=id;originName=name;});
+setupAutocomplete($('#fDest'),$('#acDest'),(id,name)=>{destAreaID=id;destName=name;});
+
+// ===== SWAP =====
 $('#swapBtn').addEventListener('click',()=>{
-  const o=$('#fOrigin'),d=$('#fDest');
-  [o.value,d.value]=[d.value,o.value];
+  const ov=$('#fOrigin').value,dv=$('#fDest').value;
+  $('#fOrigin').value=dv;$('#fDest').value=ov;
+  const oid=originAreaID,on=originName;
+  originAreaID=destAreaID;originName=destName;
+  destAreaID=oid;destName=on;
 });
 
-// Date default
-const today=new Date().toISOString().split('T')[0];
-$('#fDate').min=today;$('#fDate').value=today;
+// ===== DATE DEFAULT =====
+const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+const tStr=tomorrow.toISOString().split('T')[0];
+$('#fDate').min=new Date().toISOString().split('T')[0];
+$('#fDate').value=tStr;
 
-// All day toggle
-$('#alldayToggle').addEventListener('click',()=>{
-  allDay=!allDay;
-  $('#alldayToggle').classList.toggle('on',allDay);
-  $('#fTimeFrom').disabled=allDay;$('#fTimeTo').disabled=allDay;
-  if(allDay){$('#fTimeFrom').value='00:00';$('#fTimeTo').value='23:59';}
-});
+// (time slot handled by select box)
 
-// Seat type
+// ===== SEAT TYPE =====
 $$('.seat-type-btn').forEach(b=>b.addEventListener('click',()=>{
   $$('.seat-type-btn').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');seatType=b.dataset.type;
 }));
 
-// Seat count
+// ===== SEAT COUNT =====
 $('#seatMinus').addEventListener('click',()=>{if(seatCount>1){seatCount--;$('#seatVal').textContent=seatCount}});
 $('#seatPlus').addEventListener('click',()=>{if(seatCount<5){seatCount++;$('#seatVal').textContent=seatCount}});
 
-// Auto book
+// ===== AUTO BOOK =====
 $('#autoBookToggle').addEventListener('click',()=>{
   autoBook=!autoBook;$('#autoBookToggle').classList.toggle('on',autoBook);
 });
 
-// Submit
+// ===== POPULAR ROUTES =====
+$$('.pop-route').forEach(el=>el.addEventListener('click',()=>{
+  originAreaID=el.dataset.oid;originName=el.dataset.oname;
+  destAreaID=el.dataset.did;destName=el.dataset.dname;
+  $('#fOrigin').value=el.dataset.oname;
+  $('#fDest').value=el.dataset.dname;
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+// ===== SUBMIT =====
 $('#createForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  if(!originAreaID||!originName){toast('Vui long chon diem xuat phat tu danh sach goi y','error');return;}
+  if(!destAreaID||!destName){toast('Vui long chon diem den tu danh sach goi y','error');return;}
+
+  const emailVal=$('#fEmail').value.trim();
+  const name=$('#fName').value.trim();
+  const phone=$('#fPhone').value.trim();
+  if(emailVal)setCookie('futa_email',emailVal,365);
+  if(name)setCookie('futa_name',name,365);
+  if(phone)setCookie('futa_phone',phone,365);
+
+  // Update email display
+  if(emailVal){$('#emailDisplay').style.display='flex';$('#emailText').textContent=emailVal;}
+
+  // Parse time slot
+  const timeSlot=$('#fTimeSlot').value.split('-');
+  const timeFrom=timeSlot[0]||'00:00';
+  const timeTo=timeSlot[1]||'23:59';
+
   const btn=$('#submitBtn');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Đang tạo...';
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Dang tao...';
   const data={
-    origin_keyword:$('#fOrigin').value.trim(),
-    dest_keyword:$('#fDest').value.trim(),
+    origin_area_id:originAreaID,
+    origin_name:originName,
+    dest_area_id:destAreaID,
+    dest_name:destName,
     travel_date:$('#fDate').value,
-    time_from:$('#fTimeFrom').value||'00:00',
-    time_to:$('#fTimeTo').value||'23:59',
+    time_from:timeFrom,
+    time_to:timeTo,
     seat_type:seatType,
     seat_count:seatCount,
     auto_book:autoBook,
-    passenger_name:$('#fName').value.trim(),
-    passenger_phone:$('#fPhone').value.trim(),
-    passenger_email:$('#fEmail').value.trim(),
+    passenger_name:name,
+    passenger_phone:phone,
+    passenger_email:emailVal,
   };
   try{
     const resp=await fetch('/api/schedules',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(data)
     });
-    if(!resp.ok){const e=await resp.json();throw new Error(e.error||'Lỗi')}
-    toast('Tạo yêu cầu săn vé thành công!');
-    // Reset form partially
+    if(!resp.ok){const e=await resp.json();throw new Error(e.error||'Loi')}
+    toast('Tao yeu cau san ve thanh cong!');
+    // Reset route fields
     $('#fOrigin').value='';$('#fDest').value='';
+    originAreaID='';originName='';destAreaID='';destName='';
     seatCount=1;$('#seatVal').textContent=1;
-    setTimeout(()=>goTo('list'),600);
+    setTimeout(()=>goToView('tickets'),600);
   }catch(err){toast(err.message,'error')}
   finally{
     btn.disabled=false;
-    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>Bắt đầu săn vé';
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Tim chuyen xe';
   }
 });
+
+// ===== TICKETS VIEW =====
+async function loadTickets(){
+  const em=getCookie('futa_email');
+  if(!em){
+    $('#ticketList').innerHTML='<div class="empty-state"><p>Nhap email o trang chu de xem ve cua ban</p></div>';
+    return;
+  }
+  try{
+    const[statsResp,listResp]=await Promise.all([
+      fetch('/api/stats?email='+encodeURIComponent(em)),
+      fetch('/api/schedules?email='+encodeURIComponent(em)+'&status='+currentFilter)
+    ]);
+    const stats=await statsResp.json();
+    const items=await listResp.json();
+
+    const active=stats.pending+(stats.searching||0);
+    $('#statActive').textContent=active;
+    $('#statSuccess').textContent=stats.success;
+    $('#statFailed').textContent=stats.failed+(stats.cancelled||0);
+    $('#statTotal').textContent=stats.total;
+
+    renderTickets(items);
+    // Check payment status for success tickets
+    checkPaymentStatuses(items);
+  }catch(e){console.error(e)}
+}
+
+async function checkPaymentStatuses(items){
+  if(!items)return;
+  const successItems=items.filter(s=>s.status==='success'&&s.booking_id);
+  for(const s of successItems){
+    try{
+      const resp=await fetch(`/api/schedules/${s.id}/check-payment`,{method:'POST'});
+      const data=await resp.json();
+      const el=document.getElementById('payment-'+s.id);
+      if(!el)continue;
+      if(data.payment_status==='expired'){
+        // Refresh the list to show updated status
+        loadTickets();
+        return;
+      }else if(data.payment_status==='pending'){
+        el.innerHTML=`<span style="color:var(--yellow)">⏳ Cho thanh toan</span>`;
+      }else if(data.payment_status==='not_applicable'){
+        el.remove();
+      }else{
+        el.innerHTML=`<span style="color:var(--text3)">${esc(data.error||'')}</span>`;
+      }
+    }catch(e){
+      const el=document.getElementById('payment-'+s.id);
+      if(el)el.remove();
+    }
+  }
+}
+
+function renderTickets(items){
+  const c=$('#ticketList');
+  if(!items||items.length===0){
+    c.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg><p>Khong tim thay yeu cau nao</p></div>';
+    return;
+  }
+  c.innerHTML=items.map((s,i)=>{
+    const st=statusInfo(s.status);
+    let successHtml='';
+    if((s.status==='success'||s.status==='expired')&&s.booking_code){
+      const isExpired=s.status==='expired';
+      successHtml=`<div class="tc-success" style="${isExpired?'background:#FEF3C7;border-color:#FDE68A':''}">
+        <div class="tc-success-title" style="${isExpired?'color:#D97706':''}">${isExpired?'⏰ Qua han thanh toan':'✓ Dat ve thanh cong'}</div>
+        <div class="tc-success-grid">
+          <div class="tc-success-item"><span class="tc-success-label">Ma ve</span><span class="tc-success-value">${esc(s.booking_code)}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Gia ve</span><span class="tc-success-value">${formatPrice(s.ticket_price)}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Ghe</span><span class="tc-success-value">${esc(s.seat_name)||'—'}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Khoi hanh</span><span class="tc-success-value">${s.departure_time?formatDT(s.departure_time):'—'}</span></div>
+        </div>
+        ${!isExpired?`<div id="payment-${s.id}" style="margin-top:8px;font-size:12px;color:var(--text3)">Dang kiem tra thanh toan...</div>`:''}
+      </div>`;
+    }
+    let errorHtml='';
+    if(s.last_error&&s.status!=='success'&&s.status!=='expired'){
+      errorHtml=`<div class="tc-error">${esc(s.last_error)}</div>`;
+    }
+    const isActive=['pending','searching','found','booking'].includes(s.status);
+    return `<div class="ticket-card" style="animation-delay:${i*40}ms">
+      <div class="tc-top">
+        <div class="tc-route-icon"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg></div>
+        <div class="tc-route">
+          <div class="tc-route-name"><span>${esc(s.origin_name)}</span><span class="tc-route-arrow">→</span><span>${esc(s.dest_name)}</span></div>
+          <div class="tc-passenger">${esc(s.passenger_name)} · ${esc(s.passenger_phone)}</div>
+        </div>
+        <span class="badge ${s.status}">${st.label}</span>
+      </div>
+      <div class="tc-details">
+        <div class="tc-detail"><span class="tc-detail-label">Ngay di</span><span class="tc-detail-value">${formatDate(s.travel_date)}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Khung gio</span><span class="tc-detail-value">${timeSlotLabel(s.time_from,s.time_to)}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Loai ghe</span><span class="tc-detail-value">${seatTypeLabel(s.seat_type)}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">So ghe</span><span class="tc-detail-value">${s.seat_count}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Lan thu</span><span class="tc-detail-value">${s.retry_count}</span></div>
+      </div>
+      ${successHtml}${errorHtml}
+      <div class="tc-actions">
+        ${isActive?`<button class="btn-sm danger" onclick="app.cancel('${s.id}')">Huy</button>`:''}
+        <button class="btn-sm danger" onclick="app.remove('${s.id}')">Xoa</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== FILTER TABS =====
+$$('.filter-tab').forEach(tab=>tab.addEventListener('click',()=>{
+  $$('.filter-tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  currentFilter=tab.dataset.filter;
+  loadTickets();
+}));
+
+// ===== RECENT =====
+async function loadRecent(){
+  const em=getCookie('futa_email');
+  if(!em){$('#recentSection').style.display='none';return;}
+  try{
+    const resp=await fetch('/api/schedules/recent?email='+encodeURIComponent(em));
+    const items=await resp.json();
+    if(!items||items.length===0){$('#recentSection').style.display='none';return;}
+    $('#recentSection').style.display='block';
+    $('#recentList').innerHTML=items.map(s=>{
+      const st=statusInfo(s.status);
+      return `<div class="recent-item">
+        <div class="recent-route-icon"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg></div>
+        <div class="recent-info">
+          <div class="recent-route">${esc(s.origin_name)} → ${esc(s.dest_name)}</div>
+          <div class="recent-date">${formatDate(s.travel_date)} · ${esc(s.passenger_name)}</div>
+        </div>
+        <span class="badge ${s.status}">${st.label}</span>
+      </div>`;
+    }).join('');
+  }catch(e){console.error(e)}
+}
 
 // ===== GLOBAL ACTIONS =====
 window.app={
   async cancel(id){
-    if(!confirm('Hủy yêu cầu này?'))return;
+    if(!confirm('Huy yeu cau nay?'))return;
     await fetch(`/api/schedules/${id}/cancel`,{method:'POST'});
-    toast('Đã hủy yêu cầu');loadList();
+    toast('Da huy yeu cau');loadTickets();
   },
   async remove(id){
-    if(!confirm('Xóa yêu cầu này?'))return;
+    if(!confirm('Xoa yeu cau nay?'))return;
     await fetch(`/api/schedules/${id}`,{method:'DELETE'});
-    toast('Đã xóa');loadList();
+    toast('Da xoa');loadTickets();
   }
 };
 
 // ===== HELPERS =====
 function statusInfo(s){
   const map={
-    pending:{label:'Chờ xử lý'},searching:{label:'Đang tìm'},
-    found:{label:'Đã tìm thấy'},booking:{label:'Đang đặt'},
-    success:{label:'Thành công'},failed:{label:'Thất bại'},
-    cancelled:{label:'Đã hủy'}
+    pending:{label:'Cho xu ly'},searching:{label:'Dang tim'},
+    found:{label:'Da tim thay'},booking:{label:'Dang dat'},
+    success:{label:'Thanh cong'},failed:{label:'That bai'},
+    cancelled:{label:'Da huy'},expired:{label:'Qua han TT'}
   };
   return map[s]||map.pending;
 }
+function timeSlotLabel(from,to){
+  if(from==='00:00'&&(to==='23:59'||to==='24:00'))return'Ca ngay';
+  if(from==='00:00'&&to==='06:00')return'Sang som';
+  if(from==='06:00'&&to==='12:00')return'Buoi sang';
+  if(from==='12:00'&&to==='18:00')return'Buoi chieu';
+  if(from==='18:00'&&(to==='23:59'||to==='24:00'))return'Buoi toi';
+  return(from||'00:00')+' - '+(to||'23:59');
+}
 function seatTypeLabel(t){
-  if(t==='giuong_nam')return'Giường nằm';
-  if(t==='ghe_ngoi')return'Ghế ngồi';
-  return'Tất cả';
+  if(t==='giuong_nam')return'Giuong nam';
+  if(t==='ghe_ngoi')return'Ghe ngoi';
+  return'Tat ca';
 }
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function formatDate(d){
@@ -1138,13 +977,11 @@ function toast(msg,type='success'){
 
 // ===== AUTO REFRESH =====
 setInterval(()=>{
-  if(currentPage==='list')loadList();
-  if(currentPage==='dashboard')loadDashboard();
+  if(currentView==='tickets')loadTickets();
 },10000);
 
 // ===== INIT =====
-loadDashboard();
-loadSettings();
+loadRecent();
 })();
 </script>
 </body>

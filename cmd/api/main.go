@@ -45,86 +45,16 @@ func main() {
 
 	// === API Routes ===
 
-	// Settings
-	mux.HandleFunc("/api/settings", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			s, err := db.GetSettings(r.Context())
-			if err != nil {
-				jsonError(w, err.Error(), 500)
-				return
-			}
-			// Mask refresh token for security
-			masked := *s
-			if len(masked.RefreshToken) > 10 {
-				masked.RefreshToken = masked.RefreshToken[:6] + "..." + masked.RefreshToken[len(masked.RefreshToken)-4:]
-			}
-			jsonOK(w, masked)
-
-		case http.MethodPut:
-			var s database.AppSettings
-			if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
-				jsonError(w, "invalid JSON", 400)
-				return
-			}
-			if err := db.UpdateSettings(r.Context(), &s); err != nil {
-				jsonError(w, err.Error(), 500)
-				return
-			}
-			jsonOK(w, map[string]string{"message": "settings updated"})
-
-		default:
-			http.Error(w, "method not allowed", 405)
-		}
-	})
-
-	// Validate refresh token & extract user info
-	mux.HandleFunc("/api/auth/validate-token", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", 405)
-			return
-		}
-		var body struct {
-			RefreshToken string `json:"refresh_token"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			jsonError(w, "invalid JSON", 400)
-			return
-		}
-		if body.RefreshToken == "" {
-			jsonError(w, "refresh_token is required", 400)
-			return
-		}
-
-		tokenResp, err := futa.ExchangeRefreshToken(r.Context(), body.RefreshToken)
-		if err != nil {
-			jsonError(w, "Token không hợp lệ: "+err.Error(), 400)
-			return
-		}
-
-		claims, err := futa.ParseIDToken(tokenResp.IDToken)
-		if err != nil {
-			jsonError(w, "Không thể đọc thông tin từ token: "+err.Error(), 400)
-			return
-		}
-
-		// Normalize phone number
-		phone := claims.PhoneNumber
-		if strings.HasPrefix(phone, "+84") {
-			phone = "0" + phone[3:]
-		}
-
-		jsonOK(w, map[string]any{
-			"valid":     true,
-			"full_name": claims.FullName,
-			"phone":     phone,
-			"user_id":   tokenResp.UserID,
-		})
-	})
-
 	// Stats
 	mux.HandleFunc("/api/stats", func(w http.ResponseWriter, r *http.Request) {
-		stats, err := db.GetStats(r.Context())
+		emailAddr := r.URL.Query().Get("email")
+		var stats *database.Stats
+		var err error
+		if emailAddr != "" {
+			stats, err = db.GetStatsByEmail(r.Context(), emailAddr)
+		} else {
+			stats, err = db.GetStats(r.Context())
+		}
 		if err != nil {
 			jsonError(w, err.Error(), 500)
 			return
@@ -137,7 +67,14 @@ func main() {
 		switch r.Method {
 		case http.MethodGet:
 			filter := r.URL.Query().Get("status")
-			schedules, err := db.ListSchedules(r.Context(), filter)
+			emailAddr := r.URL.Query().Get("email")
+			var schedules []database.BookingSchedule
+			var err error
+			if emailAddr != "" {
+				schedules, err = db.ListSchedulesByEmail(r.Context(), emailAddr, filter)
+			} else {
+				schedules, err = db.ListSchedules(r.Context(), filter)
+			}
 			if err != nil {
 				jsonError(w, err.Error(), 500)
 				return
@@ -157,8 +94,16 @@ func main() {
 				jsonError(w, "passenger_name and passenger_phone are required", 400)
 				return
 			}
-			if s.OriginKeyword == "" || s.DestKeyword == "" {
-				jsonError(w, "origin_keyword and dest_keyword are required", 400)
+			if s.PassengerEmail == "" {
+				jsonError(w, "passenger_email is required", 400)
+				return
+			}
+			if s.OriginAreaID == "" || s.OriginName == "" {
+				jsonError(w, "origin_area_id and origin_name are required", 400)
+				return
+			}
+			if s.DestAreaID == "" || s.DestName == "" {
+				jsonError(w, "dest_area_id and dest_name are required", 400)
 				return
 			}
 			if s.TravelDate == "" {
@@ -210,6 +155,54 @@ func main() {
 			return
 		}
 
+		// Handle /api/schedules/:id/check-payment
+		if len(parts) == 2 && parts[1] == "check-payment" && r.Method == http.MethodPost {
+			s, err := db.GetSchedule(r.Context(), id)
+			if err != nil {
+				jsonError(w, "schedule not found", 404)
+				return
+			}
+			if s.Status != "success" || s.BookingCode == "" {
+				jsonOK(w, map[string]any{"status": s.Status, "payment_status": "not_applicable"})
+				return
+			}
+
+			isPaid, err := futaClient.PaymentStatus(r.Context(), s.BookingCode)
+			if err != nil {
+				jsonOK(w, map[string]any{"status": s.Status, "payment_status": "unknown", "error": err.Error()})
+				return
+			}
+
+			if isPaid {
+				jsonOK(w, map[string]any{
+					"status":         s.Status,
+					"payment_status": "paid",
+					"amount":         s.TicketPrice,
+				})
+				if err := db.UpdateScheduleStatus(r.Context(), s.ID, "paid", ""); err != nil {
+					log.Printf("mark schedule paid: %v", err)
+				}
+				return
+			} else if time.Since(s.UpdatedAt) > 5*time.Minute {
+				jsonOK(w, map[string]any{
+					"status":         s.Status,
+					"payment_status": "expired",
+					"amount":         s.TicketPrice,
+				})
+				// if err := db.UpdateScheduleStatus(r.Context(), s.ID, "payment_expired", ""); err != nil {
+				// 	log.Printf("mark schedule payment expired: %v", err)
+				// }
+				return
+			}
+
+			jsonOK(w, map[string]any{
+				"status":         s.Status,
+				"payment_status": "pending",
+				"booking_code":   s.BookingCode,
+			})
+			return
+		}
+
 		switch r.Method {
 		case http.MethodGet:
 			s, err := db.GetSchedule(r.Context(), id)
@@ -231,7 +224,14 @@ func main() {
 
 	// Recent schedules for dashboard
 	mux.HandleFunc("/api/schedules/recent", func(w http.ResponseWriter, r *http.Request) {
-		schedules, err := db.GetRecentSchedules(r.Context(), 5)
+		emailAddr := r.URL.Query().Get("email")
+		var schedules []database.BookingSchedule
+		var err error
+		if emailAddr != "" {
+			schedules, err = db.GetRecentSchedulesByEmail(r.Context(), emailAddr, 5)
+		} else {
+			schedules, err = db.GetRecentSchedules(r.Context(), 5)
+		}
 		if err != nil {
 			jsonError(w, err.Error(), 500)
 			return

@@ -15,13 +15,10 @@ import (
 )
 
 type Client struct {
-	cfg          config.FutaConfig
-	httpClient   *http.Client
-	token        string
-	tokenTime    time.Time
-	refreshToken string // Firebase refresh token for authenticated mode
-	authToken    string // Access token from refresh token exchange
-	authTime     time.Time
+	cfg        config.FutaConfig
+	httpClient *http.Client
+	token      string
+	tokenTime  time.Time
 }
 
 func NewClient(cfg config.FutaConfig) *Client {
@@ -29,13 +26,6 @@ func NewClient(cfg config.FutaConfig) *Client {
 		cfg:        cfg,
 		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}
-}
-
-// SetRefreshToken sets the Firebase refresh token for authenticated API calls.
-func (c *Client) SetRefreshToken(refreshToken string) {
-	c.refreshToken = refreshToken
-	c.authToken = ""
-	c.authTime = time.Time{}
 }
 
 func (c *Client) getToken(ctx context.Context) (string, error) {
@@ -69,34 +59,10 @@ func (c *Client) getToken(ctx context.Context) (string, error) {
 	return c.token, nil
 }
 
-func (c *Client) getAuthToken(ctx context.Context) (string, error) {
-	if c.refreshToken == "" {
-		return "", nil
-	}
-	if c.authToken != "" && time.Since(c.authTime) < 50*time.Minute {
-		return c.authToken, nil
-	}
-	tokenResp, err := ExchangeRefreshToken(ctx, c.refreshToken)
-	if err != nil {
-		return "", fmt.Errorf("exchange refresh token: %w", err)
-	}
-	c.authToken = tokenResp.AccessToken
-	c.authTime = time.Now()
-	return c.authToken, nil
-}
-
 func (c *Client) doRequest(ctx context.Context, method, path string, body io.Reader) ([]byte, error) {
-	// Try authenticated token first, fallback to anonymous
-	var token string
-	var err error
-	authToken, _ := c.getAuthToken(ctx)
-	if authToken != "" {
-		token = authToken
-	} else {
-		token, err = c.getToken(ctx)
-		if err != nil {
-			return nil, err
-		}
+	token, err := c.getToken(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	fullURL := c.cfg.BaseURL + path
@@ -187,32 +153,32 @@ type RouteSearchData struct {
 }
 
 type TripSearchData struct {
-	TripID             string  `json:"tripId"`
-	DepartureTime      string  `json:"departureTime"`
-	RawDepartureTime   string  `json:"rawDepartureTime"`
-	RawDepartureDate   string  `json:"rawDepartureDate"`
-	ArrivalTime        string  `json:"arrivalTime"`
-	Duration           int     `json:"duration"`
-	SeatTypeName       string  `json:"seatTypeName"`
-	Price              int     `json:"price"`
-	EmptySeatQuantity  int     `json:"emptySeatQuantity"`
-	RouteID            string  `json:"routeId"`
-	Distance           int     `json:"distance"`
-	WayID              string  `json:"wayId"`
-	MaxSeatsPerBooking int     `json:"maxSeatsPerBooking"`
-	WayName            string  `json:"wayName"`
-	Route              Route   `json:"route"`
-	SeatTypeCode       string  `json:"seatTypeCode"`
+	TripID             string `json:"tripId"`
+	DepartureTime      string `json:"departureTime"`
+	RawDepartureTime   string `json:"rawDepartureTime"`
+	RawDepartureDate   string `json:"rawDepartureDate"`
+	ArrivalTime        string `json:"arrivalTime"`
+	Duration           int    `json:"duration"`
+	SeatTypeName       string `json:"seatTypeName"`
+	Price              int    `json:"price"`
+	EmptySeatQuantity  int    `json:"emptySeatQuantity"`
+	RouteID            string `json:"routeId"`
+	Distance           int    `json:"distance"`
+	WayID              string `json:"wayId"`
+	MaxSeatsPerBooking int    `json:"maxSeatsPerBooking"`
+	WayName            string `json:"wayName"`
+	Route              Route  `json:"route"`
+	SeatTypeCode       string `json:"seatTypeCode"`
 }
 
 type Route struct {
-	OriginCode  string `json:"originCode"`
-	DestCode    string `json:"destCode"`
-	OriginName  string `json:"originName"`
-	DestName    string `json:"destName"`
-	Name        string `json:"name"`
-	OriginHub   string `json:"originHubName"`
-	DestHub     string `json:"destHubName"`
+	OriginCode string `json:"originCode"`
+	DestCode   string `json:"destCode"`
+	OriginName string `json:"originName"`
+	DestName   string `json:"destName"`
+	Name       string `json:"name"`
+	OriginHub  string `json:"originHubName"`
+	DestHub    string `json:"destHubName"`
 }
 
 type SeatDiagramData struct {
@@ -226,16 +192,16 @@ type SeatDiagramData struct {
 }
 
 type DepartmentInWay struct {
-	DepartmentID       string  `json:"departmentId"`
-	DepartmentName     string  `json:"departmentName"`
-	DepartmentAddress  string  `json:"departmentAddress"`
-	TimeAtDepartment   int     `json:"timeAtDepartment"`
-	Passing            bool    `json:"passing"`
-	IsShuttleService   bool    `json:"isShuttleService"`
-	Latitude           float64 `json:"latitude"`
-	Longitude          float64 `json:"longitude"`
-	PointKind          int     `json:"pointKind"`
-	PresentBeforeMins  int     `json:"presentBeforeMinutes"`
+	DepartmentID      string  `json:"departmentId"`
+	DepartmentName    string  `json:"departmentName"`
+	DepartmentAddress string  `json:"departmentAddress"`
+	TimeAtDepartment  int     `json:"timeAtDepartment"`
+	Passing           bool    `json:"passing"`
+	IsShuttleService  bool    `json:"isShuttleService"`
+	Latitude          float64 `json:"latitude"`
+	Longitude         float64 `json:"longitude"`
+	PointKind         int     `json:"pointKind"`
+	PresentBeforeMins int     `json:"presentBeforeMinutes"`
 }
 
 type BookingResponse struct {
@@ -501,10 +467,10 @@ type PassengerInfo struct {
 }
 
 type TicketInfo struct {
-	Seats  []SeatRef       `json:"seats"`
-	Dropoff LocationRef    `json:"dropoff"`
-	TripID string          `json:"tripId"`
-	Pickup  LocationRef    `json:"pickup"`
+	Seats   []SeatRef   `json:"seats"`
+	Dropoff LocationRef `json:"dropoff"`
+	TripID  string      `json:"tripId"`
+	Pickup  LocationRef `json:"pickup"`
 }
 
 type SeatRef struct {
@@ -519,4 +485,88 @@ type LocationRef struct {
 	Name             string  `json:"name"`
 	TimeAtDepartment int     `json:"timeAtDepartment"`
 	Type             int     `json:"type"`
+}
+
+type PaymentInfoResponse struct {
+	Code        string `json:"code"`
+	Amount      string `json:"amount"`
+	ExpiredTime string `json:"expiredTime"`
+	PaymentURL  string `json:"paymentUrl"`
+	QRCodeURL   string `json:"qrCodeUrl"`
+	Message     string `json:"message"`
+}
+
+type PaymentStatusResponse struct {
+	Code   string `json:"code"`
+	Status string `json:"status"`
+	IsPaid bool   `json:"isPaid"`
+}
+
+func (c *Client) GetPaymentInfo(ctx context.Context, bookingID string, amount int) (*PaymentInfoResponse, error) {
+	type reqBody struct {
+		TicketID string `json:"ticketId"`
+		Amount   int    `json:"amount"`
+		Method   string `json:"method"`
+		AppID    int    `json:"appId"`
+	}
+
+	rb := reqBody{
+		TicketID: bookingID,
+		Amount:   amount,
+		Method:   "18",
+		AppID:    360,
+	}
+
+	bodyBytes, err := json.Marshal(rb)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := c.doRequest(ctx, "POST", "/vato/v1/booking/get-link-payment", strings.NewReader(string(bodyBytes)))
+	if err != nil {
+		return nil, err
+	}
+
+	var resp APIResponse
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, err
+	}
+	if resp.Status != 200 {
+		return nil, fmt.Errorf("payment info API error status %d: %s", resp.Status, string(resp.Error))
+	}
+
+	var info PaymentInfoResponse
+	if err := json.Unmarshal(resp.Data, &info); err != nil {
+		return nil, err
+	}
+	return &info, nil
+}
+
+type PaymentStatus struct {
+	BookingCode string `json:"booking_code"`
+	Status      string `json:"status"`
+}
+
+func (c *Client) PaymentStatus(ctx context.Context, bookingCode string) (bool, error) {
+	path := fmt.Sprintf("/vato/v1/booking/payment-status/%s", bookingCode)
+	data, err := c.doRequest(ctx, "GET", path, nil)
+
+	if err != nil {
+		return false, err
+	}
+
+	var resp APIResponse
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return false, err
+	}
+	if resp.Status != 200 {
+		return false, fmt.Errorf("payment info API error status %d: %s", resp.Status, string(resp.Error))
+	}
+
+	var info PaymentStatusResponse
+	if err := json.Unmarshal(resp.Data, &info); err != nil {
+		return false, err
+	}
+
+	return info.IsPaid, nil
 }

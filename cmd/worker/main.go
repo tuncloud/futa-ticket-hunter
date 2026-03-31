@@ -11,6 +11,7 @@ import (
 
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/config"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/database"
+	"github.com/tuandoquoc/futa-ticket-hunter/internal/email"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/futa"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/webhook"
 )
@@ -63,21 +64,8 @@ func main() {
 }
 
 func processSchedules(ctx context.Context, db *database.DB, client *futa.Client, cfg *config.Config) {
-	// Load settings for refresh token & webhook config
-	settings, err := db.GetSettings(ctx)
-	if err != nil {
-		log.Printf("ERROR load settings: %v", err)
-	} else if settings.RefreshToken != "" {
-		client.SetRefreshToken(settings.RefreshToken)
-	}
-
-	// Create webhook sender from DB settings (override config)
-	whCfg := cfg.Webhook
-	if settings != nil && settings.WebhookURL != "" {
-		whCfg.URL = settings.WebhookURL
-		whCfg.Secret = settings.WebhookSecret
-	}
-	wh := webhook.NewSender(whCfg)
+	wh := webhook.NewSender(cfg.Webhook)
+	em := email.NewSender(cfg.Email)
 
 	schedules, err := db.GetPendingSchedules(ctx, cfg.Worker.MaxRetries)
 	if err != nil {
@@ -95,55 +83,20 @@ func processSchedules(ctx context.Context, db *database.DB, client *futa.Client,
 		if ctx.Err() != nil {
 			return
 		}
-		processOne(ctx, db, client, wh, s)
+		processOne(ctx, db, client, wh, em, s)
 	}
 }
 
-func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *webhook.Sender, s database.BookingSchedule) {
+func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *webhook.Sender, em *email.Sender, s database.BookingSchedule) {
 	log.Printf("[%s] Processing: %s -> %s on %s (%s-%s)",
-		s.ID[:8], s.OriginKeyword, s.DestKeyword, s.TravelDate, s.TimeFrom, s.TimeTo)
+		s.ID[:8], s.OriginName, s.DestName, s.TravelDate, s.TimeFrom, s.TimeTo)
 
 	db.UpdateScheduleStatus(ctx, s.ID, "searching", "")
 
-	// Step 1: Resolve origin area ID
 	originAreaID := s.OriginAreaID
-	if originAreaID == "" {
-		groups, areas, err := client.SearchPickupPoints(ctx, s.OriginKeyword)
-		if err != nil {
-			db.UpdateScheduleStatus(ctx, s.ID, "searching", fmt.Sprintf("search origin: %v", err))
-			return
-		}
-		if len(areas) > 0 {
-			originAreaID = areas[0].ID
-		} else if len(groups) > 0 && len(groups[0].Group) > 0 {
-			originAreaID = groups[0].Group[0].ProvinceID
-		}
-		if originAreaID == "" {
-			db.UpdateScheduleStatus(ctx, s.ID, "searching", "no origin area found")
-			return
-		}
-	}
-
-	// Step 2: Resolve dest area ID
 	destAreaID := s.DestAreaID
-	if destAreaID == "" {
-		groups, areas, err := client.SearchPickupPoints(ctx, s.DestKeyword)
-		if err != nil {
-			db.UpdateScheduleStatus(ctx, s.ID, "searching", fmt.Sprintf("search dest: %v", err))
-			return
-		}
-		if len(areas) > 0 {
-			destAreaID = areas[0].ID
-		} else if len(groups) > 0 && len(groups[0].Group) > 0 {
-			destAreaID = groups[0].Group[0].ProvinceID
-		}
-		if destAreaID == "" {
-			db.UpdateScheduleStatus(ctx, s.ID, "searching", "no dest area found")
-			return
-		}
-	}
 
-	// Step 3: Search routes
+	// Search routes
 	fromDate := s.TravelDate + "T00:00:00.000+07:00"
 	routes, err := client.SearchRoutes(ctx, originAreaID, destAreaID, fromDate)
 	if err != nil {
@@ -160,7 +113,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 		routeIDs[i] = r.RouteID
 	}
 
-	// Step 4: Search trips
+	// Search trips
 	toDate := s.TravelDate + "T23:59:59.000+07:00"
 	trips, err := client.SearchTripsByRoute(ctx, routeIDs, fromDate, toDate)
 	if err != nil {
@@ -174,7 +127,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 
 	log.Printf("[%s] Found %d trips", s.ID[:8], len(trips))
 
-	// Step 5: Filter and find suitable trip
+	// Filter and find suitable trip
 	for _, trip := range trips {
 		if trip.EmptySeatQuantity < s.SeatCount {
 			continue
@@ -204,7 +157,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			return
 		}
 
-		// Step 6: Get seat diagram
+		// Get seat diagram
 		seats, err := client.GetSeatDiagram(ctx, trip.TripID)
 		if err != nil {
 			log.Printf("[%s] Error getting seats: %v", s.ID[:8], err)
@@ -225,7 +178,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			continue
 		}
 
-		// Step 7: Get departments for pickup/dropoff
+		// Get departments for pickup/dropoff
 		depts, err := client.GetDepartmentsInWay(ctx, trip.WayID, trip.RouteID)
 		if err != nil || len(depts) < 2 {
 			continue
@@ -248,7 +201,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			}
 		}
 
-		// Step 8: Book
+		// Book
 		db.UpdateScheduleStatus(ctx, s.ID, "booking", "")
 
 		seatRefs := make([]futa.SeatRef, len(availableSeats))
@@ -305,19 +258,35 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 		depTime, _ := time.Parse(time.RFC3339, trip.DepartureTime)
 		db.UpdateScheduleSuccess(ctx, s.ID,
 			booking.ID, booking.Code,
-			seatNames, trip.Route.Name,
+			seatNames,
 			booking.TotalPrice, &depTime)
 
 		log.Printf("[%s] SUCCESS! Code: %s, Price: %d, Seats: %s",
 			s.ID[:8], booking.Code, booking.TotalPrice, seatNames)
+
+		// Send payment email
+		if s.PassengerEmail != "" {
+			if err := em.SendPaymentLink(email.PaymentInfo{
+				BookingID:   booking.ID,
+				BookingCode: booking.Code,
+				PhoneNumber: s.PassengerPhone,
+				ToEmail:     s.PassengerEmail,
+				ToName:      s.PassengerName,
+				OriginName:  s.OriginName,
+				DestName:    s.DestName,
+				TravelDate:  s.TravelDate,
+				SeatName:    seatNames,
+				TicketPrice: booking.TotalPrice,
+			}); err != nil {
+				log.Printf("[%s] Payment email failed: %v", s.ID[:8], err)
+			}
+		}
 
 		// Send webhook
 		updated, _ := db.GetSchedule(ctx, s.ID)
 		if updated != nil {
 			if err := wh.Send(ctx, *updated); err != nil {
 				log.Printf("[%s] Webhook failed: %v", s.ID[:8], err)
-			} else {
-				db.MarkWebhookSent(ctx, s.ID)
 			}
 		}
 		return
