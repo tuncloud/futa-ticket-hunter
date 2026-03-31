@@ -32,13 +32,35 @@ spec:
     spec:
       containers:
         - name: api
-          image: futa-ticket-hunter-api:latest
+          image: tuandoquoc/futa-ticket-hunter-api:latest
           imagePullPolicy: IfNotPresent
           command: ["/app/api", "/app/config.yaml"]
           ports:
             - containerPort: 8080
               name: http
         - name: worker
-          image: futa-ticket-hunter-worker:latest
+          image: tuandoquoc/futa-ticket-hunter-worker:latest
           imagePullPolicy: IfNotPresent
           command: ["/app/worker", "/app/config.yaml"]
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: futa-ticket-hunter-ingress
+  namespace: futa
+  annotations:
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: futa.tuando.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: futa-ticket-hunter-api
+                port:
+                  number: 8080
