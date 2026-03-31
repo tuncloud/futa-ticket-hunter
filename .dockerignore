@@ -1,0 +1,9 @@
+.git
+.gitignore
+.vscode
+bin
+k8s
+ui-screenshot
+*.log
+*.tmp
+docker-compose.yml

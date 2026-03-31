@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+database:
+  host: localhost
+  port: 5432
+  user: futa
+  password: futa_secret
+  dbname: futa_hunter
+  sslmode: disable
+
+worker:
+  poll_interval: 30s
+  max_retries: 3
+
+webhook:
+  url: "https://workflow.tuando.app/webhook/e0d886bd-59d1-4a95-b596-71fc67b265bd"
+  secret: "test_secret"
+
+futa:
+  base_url: https://api-online.futabus.vn
+  web_url: https://futabus.vn
+  user_agent: "FUTA/7.36.4 (com.client.facecar; build:1; iOS 26.2.0) Alamofire/5.9.1"
+  app_version: "7.36.4"
+  channel: "mobile_app"

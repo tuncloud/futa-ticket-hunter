@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: futa-ticket-hunter-api
+  labels:
+    app: futa-ticket-hunter
+spec:
+  type: ClusterIP
+  selector:
+    app: futa-ticket-hunter
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: futa-ticket-hunter
+  labels:
+    app: futa-ticket-hunter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: futa-ticket-hunter
+  template:
+    metadata:
+      labels:
+        app: futa-ticket-hunter
+    spec:
+      containers:
+        - name: api
+          image: futa-ticket-hunter-api:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/api", "/app/config.yaml"]
+          ports:
+            - containerPort: 8080
+              name: http
+        - name: worker
+          image: futa-ticket-hunter-worker:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/worker", "/app/config.yaml"]
