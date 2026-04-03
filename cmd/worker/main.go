@@ -202,7 +202,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 		}
 
 		// Book
-		db.UpdateScheduleStatus(ctx, s.ID, "booking", "")
+		// db.UpdateScheduleStatus(ctx, s.ID, "booking", "")
 
 		seatRefs := make([]futa.SeatRef, len(availableSeats))
 		for i, seat := range availableSeats {
