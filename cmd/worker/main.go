@@ -258,6 +258,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 		depTime, _ := time.Parse(time.RFC3339, trip.DepartureTime)
 		db.UpdateScheduleSuccess(ctx, s.ID,
 			booking.ID, booking.Code,
+			trip.Route.Name,
 			seatNames,
 			booking.TotalPrice, &depTime)
 
@@ -277,6 +278,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 				TravelDate:  s.TravelDate,
 				SeatName:    seatNames,
 				TicketPrice: booking.TotalPrice,
+				RouteName:   trip.Route.Name,
 			}); err != nil {
 				log.Printf("[%s] Payment email failed: %v", s.ID[:8], err)
 			}

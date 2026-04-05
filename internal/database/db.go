@@ -44,6 +44,8 @@ type BookingSchedule struct {
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+
+	RouteName string `json:"route_name,omitempty"`
 }
 
 type Stats struct {
@@ -270,14 +272,14 @@ func (db *DB) UpdateScheduleStatus(ctx context.Context, id, status, lastError st
 	return err
 }
 
-func (db *DB) UpdateScheduleSuccess(ctx context.Context, id, bookingID, bookingCode, seatName string, price int, departureTime *time.Time) error {
+func (db *DB) UpdateScheduleSuccess(ctx context.Context, id, bookingID, bookingCode, routeName, seatName string, price int, departureTime *time.Time) error {
 	_, err := db.Pool.Exec(ctx,
 		`UPDATE booking_schedules SET
-			booking_id=$1, booking_code=$2,
-			seat_name=$3, ticket_price=$4, departure_time=$5,
+			booking_id=$1, booking_code=$2, route_name=$3,
+			seat_name=$4, ticket_price=$5, departure_time=$6,
 			updated_at=NOW()
-		WHERE id=$6`,
-		bookingID, bookingCode, seatName, price, departureTime, id)
+		WHERE id=$7`,
+		bookingID, bookingCode, routeName, seatName, price, departureTime, id)
 	return err
 }
 

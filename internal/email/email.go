@@ -35,6 +35,7 @@ type PaymentInfo struct {
 	TravelDate  string
 	SeatName    string
 	TicketPrice int
+	RouteName   string
 }
 
 func (s *Sender) SendPaymentLink(info PaymentInfo) error {
@@ -74,7 +75,7 @@ func (s *Sender) SendPaymentLink(info PaymentInfo) error {
     <p style="font-size:14px;color:#555;margin:12px 0">Ve xe cua ban da duoc dat thanh cong. Vui long thanh toan de hoan tat.</p>
     <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:16px 0">
       <table style="width:100%%;font-size:13px;color:#333">
-        <tr><td style="padding:4px 0;color:#999">Tuyen</td><td style="padding:4px 0;font-weight:600;text-align:right">%s → %s</td></tr>
+        <tr><td style="padding:4px 0;color:#999">Tuyen</td><td style="padding:4px 0;font-weight:600;text-align:right">%s</td></tr>
         <tr><td style="padding:4px 0;color:#999">Ngay di</td><td style="padding:4px 0;font-weight:600;text-align:right">%s</td></tr>
         <tr><td style="padding:4px 0;color:#999">Ghe</td><td style="padding:4px 0;font-weight:600;text-align:right">%s</td></tr>
         <tr><td style="padding:4px 0;color:#999">Ma ve</td><td style="padding:4px 0;font-weight:600;text-align:right">%s</td></tr>
@@ -86,7 +87,7 @@ func (s *Sender) SendPaymentLink(info PaymentInfo) error {
   </div>
 </div>`,
 		esc(info.ToName),
-		esc(info.OriginName), esc(info.DestName),
+		esc(info.RouteName),
 		esc(info.TravelDate),
 		esc(info.SeatName),
 		esc(info.BookingCode),
