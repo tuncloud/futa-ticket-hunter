@@ -92,7 +92,7 @@ const scheduleColumns = `id,
 	status, booking_id, booking_code, ticket_price,
 	seat_name, departure_time,
 	retry_count, last_error,
-	created_at, updated_at`
+	created_at, updated_at, route_name`
 
 func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
 	var s BookingSchedule
