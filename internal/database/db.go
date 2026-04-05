@@ -45,7 +45,7 @@ type BookingSchedule struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 
-	RouteName string `json:"route_name,omitempty"`
+	RouteName string `json:"route_name"`
 }
 
 type Stats struct {
