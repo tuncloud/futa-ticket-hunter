@@ -108,6 +108,7 @@ func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
 		&s.SeatName, &s.DepartureTime,
 		&s.RetryCount, &s.LastError,
 		&s.CreatedAt, &s.UpdatedAt,
+		&s.RouteName,
 	)
 	if err != nil {
 		return nil, err
