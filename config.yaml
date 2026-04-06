@@ -9,7 +9,7 @@ database:
   dbname: defaultdb
 
 worker:
-  poll_interval: 30s
+  poll_interval: 5s
   max_retries: 3
 
 webhook:
