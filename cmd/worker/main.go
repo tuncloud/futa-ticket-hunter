@@ -266,23 +266,23 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			s.ID[:8], booking.Code, booking.TotalPrice, seatNames)
 
 		// Send payment email
-		if s.PassengerEmail != "" {
-			if err := em.SendPaymentLink(email.PaymentInfo{
-				BookingID:   booking.ID,
-				BookingCode: booking.Code,
-				PhoneNumber: s.PassengerPhone,
-				ToEmail:     s.PassengerEmail,
-				ToName:      s.PassengerName,
-				OriginName:  s.OriginName,
-				DestName:    s.DestName,
-				TravelDate:  s.TravelDate,
-				SeatName:    seatNames,
-				TicketPrice: booking.TotalPrice,
-				RouteName:   trip.Route.Name,
-			}); err != nil {
-				log.Printf("[%s] Payment email failed: %v", s.ID[:8], err)
-			}
-		}
+		// if s.PassengerEmail != "" {
+		// 	if err := em.SendPaymentLink(email.PaymentInfo{
+		// 		BookingID:   booking.ID,
+		// 		BookingCode: booking.Code,
+		// 		PhoneNumber: s.PassengerPhone,
+		// 		ToEmail:     s.PassengerEmail,
+		// 		ToName:      s.PassengerName,
+		// 		OriginName:  s.OriginName,
+		// 		DestName:    s.DestName,
+		// 		TravelDate:  s.TravelDate,
+		// 		SeatName:    seatNames,
+		// 		TicketPrice: booking.TotalPrice,
+		// 		RouteName:   trip.Route.Name,
+		// 	}); err != nil {
+		// 		log.Printf("[%s] Payment email failed: %v", s.ID[:8], err)
+		// 	}
+		// }
 
 		// Send webhook
 		updated, _ := db.GetSchedule(ctx, s.ID)
