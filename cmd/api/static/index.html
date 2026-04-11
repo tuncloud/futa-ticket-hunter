@@ -158,6 +158,7 @@ input,button,select,textarea{font-family:inherit}
 }
 .seat-counter button:hover{background:var(--orange-light);color:var(--orange)}
 .seat-counter .val{width:40px;text-align:center;font-size:16px;font-weight:700;color:var(--text)}
+.seat-pref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
 
 /* ===== PASSENGER ===== */
 .passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -300,6 +301,7 @@ input,button,select,textarea{font-family:inherit}
 .badge.found{background:var(--blue-light);color:var(--blue)}
 .badge.booking{background:var(--blue-light);color:var(--blue)}
 .badge.success{background:var(--green-light);color:var(--green)}
+.badge.paid{background:var(--green-light);color:var(--green)}
 .badge.failed{background:var(--red-light);color:var(--red)}
 .badge.cancelled{background:#F3F4F6;color:#6B7280}
 .badge.expired{background:#FEF3C7;color:#D97706}
@@ -349,12 +351,14 @@ input,button,select,textarea{font-family:inherit}
   .stats-bar{grid-template-columns:1fr 1fr}
   .hero{padding:24px 16px}
   .nav-tabs{margin:0 8px}
+  .seat-pref-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:480px){
   .time-row{grid-template-columns:1fr}
   .popular-routes{grid-template-columns:1fr}
   .stats-bar{grid-template-columns:1fr 1fr}
   .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .seat-pref-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -438,6 +442,33 @@ input,button,select,textarea{font-family:inherit}
             <button type="button" id="seatMinus">-</button>
             <div class="val" id="seatVal">1</div>
             <button type="button" id="seatPlus">+</button>
+          </div>
+        </div>
+        <div class="seat-pref-grid">
+          <div class="fi">
+            <label>Tang</label>
+            <select id="fSeatFloor">
+              <option value="any">Ca hai tang</option>
+              <option value="up">Tang tren</option>
+              <option value="down">Tang duoi</option>
+            </select>
+          </div>
+          <div class="fi">
+            <label>Vi tri cua so</label>
+            <select id="fSeatWindow">
+              <option value="any">Khong uu tien</option>
+              <option value="window">Cua so</option>
+              <option value="non_window">Khong cua so</option>
+            </select>
+          </div>
+          <div class="fi">
+            <label>Uu tien hang dau</label>
+            <select id="fPriorityTopRows">
+              <option value="0">Khong uu tien</option>
+              <option value="1">1 hang dau</option>
+              <option value="2">2 hang dau</option>
+              <option value="3">3 hang dau</option>
+            </select>
           </div>
         </div>
       </div>
@@ -546,8 +577,13 @@ function setCookie(name,value,days){
 let currentView='search';
 let seatCount=1;
 let seatType='any';
+let seatFloor='any';
+let seatWindow='any';
+let priorityTopRows=0;
 let autoBook=true;
 let currentFilter='all';
+const paymentTerminalBySchedule={};
+const paymentLastCheckedAt={};
 
 // Hidden area IDs from autocomplete selection
 let originAreaID='';
@@ -709,6 +745,11 @@ $$('.seat-type-btn').forEach(b=>b.addEventListener('click',()=>{
 $('#seatMinus').addEventListener('click',()=>{if(seatCount>1){seatCount--;$('#seatVal').textContent=seatCount}});
 $('#seatPlus').addEventListener('click',()=>{if(seatCount<5){seatCount++;$('#seatVal').textContent=seatCount}});
 
+// ===== SEAT PREFERENCES =====
+$('#fSeatFloor').addEventListener('change',function(){seatFloor=this.value||'any';});
+$('#fSeatWindow').addEventListener('change',function(){seatWindow=this.value||'any';});
+$('#fPriorityTopRows').addEventListener('change',function(){priorityTopRows=parseInt(this.value||'0',10)||0;});
+
 // ===== AUTO BOOK =====
 $('#autoBookToggle').addEventListener('click',()=>{
   autoBook=!autoBook;$('#autoBookToggle').classList.toggle('on',autoBook);
@@ -756,6 +797,9 @@ $('#createForm').addEventListener('submit',async e=>{
     time_to:timeTo,
     seat_type:seatType,
     seat_count:seatCount,
+    seat_floor:seatFloor,
+    seat_window:seatWindow,
+    priority_top_rows:priorityTopRows,
     auto_book:autoBook,
     passenger_name:name,
     passenger_phone:phone,
@@ -811,25 +855,32 @@ async function checkPaymentStatuses(items){
   if(!items)return;
   const successItems=items.filter(s=>s.status==='success'&&s.booking_id);
   for(const s of successItems){
+    if(paymentTerminalBySchedule[s.id])continue;
+    const lastChecked=paymentLastCheckedAt[s.id]||0;
+    if(Date.now()-lastChecked<15000)continue;
+    paymentLastCheckedAt[s.id]=Date.now();
+
     try{
       const resp=await fetch(`/api/schedules/${s.id}/check-payment`,{method:'POST'});
       const data=await resp.json();
       const el=document.getElementById('payment-'+s.id);
       if(!el)continue;
       if(data.payment_status==='expired'){
-        // Refresh the list to show updated status
-        loadTickets();
-        return;
+        paymentTerminalBySchedule[s.id]='expired';
+        el.innerHTML=`<span style="color:#D97706">⏰ Qua han thanh toan</span>`;
       }else if(data.payment_status==='pending'){
         el.innerHTML=`<span style="color:var(--yellow)">⏳ Cho thanh toan</span>`;
       }else if(data.payment_status==='not_applicable'){
+        paymentTerminalBySchedule[s.id]='not_applicable';
         el.remove();
+      }else if(data.payment_status==='paid'){
+        paymentTerminalBySchedule[s.id]='paid';
+        el.innerHTML=`<span style="color:var(--green)">✅ Da thanh toan</span>`;
       }else{
         el.innerHTML=`<span style="color:var(--text3)">${esc(data.error||'')}</span>`;
       }
     }catch(e){
-      const el=document.getElementById('payment-'+s.id);
-      if(el)el.remove();
+      paymentLastCheckedAt[s.id]=Date.now()-10000;
     }
   }
 }
@@ -843,7 +894,7 @@ function renderTickets(items){
   c.innerHTML=items.map((s,i)=>{
     const st=statusInfo(s.status);
     let successHtml='';
-    if((s.status==='success'||s.status==='expired')&&s.booking_code){
+    if((s.status==='success'||s.status==='paid'||s.status==='expired')&&s.booking_code){
       const isExpired=s.status==='expired';
       successHtml=`<div class="tc-success" style="${isExpired?'background:#FEF3C7;border-color:#FDE68A':''}">
         <div class="tc-success-title" style="${isExpired?'color:#D97706':''}">${isExpired?'⏰ Qua han thanh toan':'✓ Dat ve thanh cong'}</div>
@@ -936,7 +987,7 @@ function statusInfo(s){
   const map={
     pending:{label:'Cho xu ly'},searching:{label:'Dang tim'},
     found:{label:'Da tim thay'},booking:{label:'Dang dat'},
-    success:{label:'Thanh cong'},failed:{label:'That bai'},
+    success:{label:'Thanh cong'},paid:{label:'Da thanh toan'},failed:{label:'That bai'},
     cancelled:{label:'Da huy'},expired:{label:'Qua han TT'}
   };
   return map[s]||map.pending;

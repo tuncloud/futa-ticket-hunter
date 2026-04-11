@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sort"
 	"syscall"
 	"time"
 
@@ -127,6 +128,16 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 
 	log.Printf("[%s] Found %d trips", s.ID[:8], len(trips))
 
+	// Prefer later departures first when multiple trips match.
+	sort.SliceStable(trips, func(i, j int) bool {
+		a := trips[i].RawDepartureTime
+		b := trips[j].RawDepartureTime
+		if a != b {
+			return a > b
+		}
+		return trips[i].DepartureTime > trips[j].DepartureTime
+	})
+
 	// Filter and find suitable trip
 	for _, trip := range trips {
 		if trip.EmptySeatQuantity < s.SeatCount {
@@ -164,15 +175,13 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			continue
 		}
 
-		var availableSeats []futa.SeatDiagramData
-		for _, seat := range seats {
-			if len(seat.Status) == 0 {
-				availableSeats = append(availableSeats, seat)
-			}
-			if len(availableSeats) >= s.SeatCount {
-				break
-			}
-		}
+		availableSeats := pickPreferredSeats(
+			seats,
+			s.SeatCount,
+			normalizeSeatFloor(s.SeatFloor),
+			normalizeSeatWindow(s.SeatWindow),
+			s.PriorityTopRows,
+		)
 
 		if len(availableSeats) < s.SeatCount {
 			continue
@@ -200,9 +209,6 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 				break
 			}
 		}
-
-		// Book
-		// db.UpdateScheduleStatus(ctx, s.ID, "booking", "")
 
 		seatRefs := make([]futa.SeatRef, len(availableSeats))
 		for i, seat := range availableSeats {
@@ -266,23 +272,23 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			s.ID[:8], booking.Code, booking.TotalPrice, seatNames)
 
 		// Send payment email
-		// if s.PassengerEmail != "" {
-		// 	if err := em.SendPaymentLink(email.PaymentInfo{
-		// 		BookingID:   booking.ID,
-		// 		BookingCode: booking.Code,
-		// 		PhoneNumber: s.PassengerPhone,
-		// 		ToEmail:     s.PassengerEmail,
-		// 		ToName:      s.PassengerName,
-		// 		OriginName:  s.OriginName,
-		// 		DestName:    s.DestName,
-		// 		TravelDate:  s.TravelDate,
-		// 		SeatName:    seatNames,
-		// 		TicketPrice: booking.TotalPrice,
-		// 		RouteName:   trip.Route.Name,
-		// 	}); err != nil {
-		// 		log.Printf("[%s] Payment email failed: %v", s.ID[:8], err)
-		// 	}
-		// }
+		if s.PassengerEmail != "" {
+			if err := em.SendPaymentLink(email.PaymentInfo{
+				BookingID:   booking.ID,
+				BookingCode: booking.Code,
+				PhoneNumber: s.PassengerPhone,
+				ToEmail:     s.PassengerEmail,
+				ToName:      s.PassengerName,
+				OriginName:  s.OriginName,
+				DestName:    s.DestName,
+				TravelDate:  s.TravelDate,
+				SeatName:    seatNames,
+				TicketPrice: booking.TotalPrice,
+				RouteName:   trip.Route.Name,
+			}); err != nil {
+				log.Printf("[%s] Payment email failed: %v", s.ID[:8], err)
+			}
+		}
 
 		// Send webhook
 		updated, _ := db.GetSchedule(ctx, s.ID)
@@ -295,4 +301,147 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 	}
 
 	db.UpdateScheduleStatus(ctx, s.ID, "searching", "no suitable trip/seats found this round")
+}
+
+func normalizeSeatFloor(v string) string {
+	switch v {
+	case "up", "down", "any":
+		return v
+	default:
+		return "any"
+	}
+}
+
+func normalizeSeatWindow(v string) string {
+	switch v {
+	case "window", "non_window", "any":
+		return v
+	default:
+		return "any"
+	}
+}
+
+type floorMeta struct {
+	minCol      int
+	maxCol      int
+	priorityRow map[int]bool
+}
+
+func pickPreferredSeats(seats []futa.SeatDiagramData, seatCount int, floorPref, windowPref string, priorityTopRows int) []futa.SeatDiagramData {
+	if seatCount <= 0 {
+		return nil
+	}
+	if priorityTopRows < 0 {
+		priorityTopRows = 0
+	}
+
+	filtered := make([]futa.SeatDiagramData, 0, len(seats))
+	for _, seat := range seats {
+		if len(seat.Status) != 0 {
+			continue
+		}
+		if floorPref != "any" && seat.Floor != floorPref {
+			continue
+		}
+		filtered = append(filtered, seat)
+	}
+	if len(filtered) < seatCount {
+		return nil
+	}
+
+	floorRows := map[string][]int{}
+	floorRowsSet := map[string]map[int]bool{}
+	meta := map[string]*floorMeta{}
+
+	for _, seat := range filtered {
+		m, ok := meta[seat.Floor]
+		if !ok {
+			m = &floorMeta{minCol: seat.ColumnNo, maxCol: seat.ColumnNo, priorityRow: map[int]bool{}}
+			meta[seat.Floor] = m
+		}
+		if seat.ColumnNo < m.minCol {
+			m.minCol = seat.ColumnNo
+		}
+		if seat.ColumnNo > m.maxCol {
+			m.maxCol = seat.ColumnNo
+		}
+
+		if _, ok := floorRowsSet[seat.Floor]; !ok {
+			floorRowsSet[seat.Floor] = map[int]bool{}
+		}
+		if !floorRowsSet[seat.Floor][seat.RowNo] {
+			floorRowsSet[seat.Floor][seat.RowNo] = true
+			floorRows[seat.Floor] = append(floorRows[seat.Floor], seat.RowNo)
+		}
+	}
+
+	for floor, rows := range floorRows {
+		sort.Ints(rows)
+		if priorityTopRows <= 0 {
+			continue
+		}
+		limit := priorityTopRows
+		if limit > len(rows) {
+			limit = len(rows)
+		}
+		m := meta[floor]
+		for i := 0; i < limit; i++ {
+			m.priorityRow[rows[i]] = true
+		}
+	}
+
+	candidates := filtered
+	if windowPref != "any" {
+		next := make([]futa.SeatDiagramData, 0, len(filtered))
+		for _, seat := range filtered {
+			m := meta[seat.Floor]
+			isWindow := seat.ColumnNo == m.minCol || seat.ColumnNo == m.maxCol
+			if windowPref == "window" && isWindow {
+				next = append(next, seat)
+			}
+			if windowPref == "non_window" && !isWindow {
+				next = append(next, seat)
+			}
+		}
+		candidates = next
+	}
+
+	if len(candidates) < seatCount {
+		return nil
+	}
+
+	floorOrder := func(f string) int {
+		switch f {
+		case "down":
+			return 0
+		case "up":
+			return 1
+		default:
+			return 2
+		}
+	}
+
+	sort.Slice(candidates, func(i, j int) bool {
+		a := candidates[i]
+		b := candidates[j]
+
+		aPriority := priorityTopRows > 0 && meta[a.Floor] != nil && meta[a.Floor].priorityRow[a.RowNo]
+		bPriority := priorityTopRows > 0 && meta[b.Floor] != nil && meta[b.Floor].priorityRow[b.RowNo]
+		if aPriority != bPriority {
+			return aPriority
+		}
+
+		if floorPref == "any" && a.Floor != b.Floor {
+			return floorOrder(a.Floor) < floorOrder(b.Floor)
+		}
+		if a.RowNo != b.RowNo {
+			return a.RowNo < b.RowNo
+		}
+		if a.ColumnNo != b.ColumnNo {
+			return a.ColumnNo < b.ColumnNo
+		}
+		return a.Name < b.Name
+	})
+
+	return candidates[:seatCount]
 }

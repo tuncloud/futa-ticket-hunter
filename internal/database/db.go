@@ -23,9 +23,12 @@ type BookingSchedule struct {
 	TimeFrom   string `json:"time_from"`
 	TimeTo     string `json:"time_to"`
 
-	SeatType  string `json:"seat_type"`
-	SeatCount int    `json:"seat_count"`
-	AutoBook  bool   `json:"auto_book"`
+	SeatType        string `json:"seat_type"`
+	SeatCount       int    `json:"seat_count"`
+	SeatFloor       string `json:"seat_floor"`
+	SeatWindow      string `json:"seat_window"`
+	PriorityTopRows int    `json:"priority_top_rows"`
+	AutoBook        bool   `json:"auto_book"`
 
 	PassengerName  string `json:"passenger_name"`
 	PassengerPhone string `json:"passenger_phone"`
@@ -87,7 +90,7 @@ const scheduleColumns = `id,
 	origin_area_id, origin_name,
 	dest_area_id, dest_name,
 	travel_date, time_from, time_to,
-	seat_type, seat_count, auto_book,
+	seat_type, seat_count, seat_floor, seat_window, priority_top_rows, auto_book,
 	passenger_name, passenger_phone, passenger_email,
 	status, booking_id, booking_code, ticket_price,
 	seat_name, departure_time,
@@ -102,7 +105,7 @@ func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
 		&s.OriginAreaID, &s.OriginName,
 		&s.DestAreaID, &s.DestName,
 		&travelDate, &s.TimeFrom, &s.TimeTo,
-		&s.SeatType, &s.SeatCount, &s.AutoBook,
+		&s.SeatType, &s.SeatCount, &s.SeatFloor, &s.SeatWindow, &s.PriorityTopRows, &s.AutoBook,
 		&s.PassengerName, &s.PassengerPhone, &s.PassengerEmail,
 		&s.Status, &s.BookingID, &s.BookingCode, &s.TicketPrice,
 		&s.SeatName, &s.DepartureTime,
@@ -123,15 +126,15 @@ func (db *DB) CreateSchedule(ctx context.Context, s *BookingSchedule) error {
 			origin_area_id, origin_name,
 			dest_area_id, dest_name,
 			travel_date, time_from, time_to,
-			seat_type, seat_count, auto_book,
+			seat_type, seat_count, seat_floor, seat_window, priority_top_rows, auto_book,
 			passenger_name, passenger_phone, passenger_email,
 			status
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'pending')
+		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'pending')
 		RETURNING id, created_at, updated_at`,
 		s.OriginAreaID, s.OriginName,
 		s.DestAreaID, s.DestName,
 		s.TravelDate, s.TimeFrom, s.TimeTo,
-		s.SeatType, s.SeatCount, s.AutoBook,
+		s.SeatType, s.SeatCount, s.SeatFloor, s.SeatWindow, s.PriorityTopRows, s.AutoBook,
 		s.PassengerName, s.PassengerPhone, s.PassengerEmail,
 	).Scan(&s.ID, &s.CreatedAt, &s.UpdatedAt)
 }
@@ -161,7 +164,7 @@ func (db *DB) listSchedules(ctx context.Context, emailAddr, statusFilter string)
 		case "active":
 			conditions = append(conditions, "status IN ('pending','searching','found','booking')")
 		case "success":
-			conditions = append(conditions, "status = 'success'")
+			conditions = append(conditions, "status IN ('success','paid')")
 		case "failed":
 			conditions = append(conditions, "status IN ('failed','cancelled','expired')")
 		default:
@@ -209,7 +212,7 @@ func (db *DB) DeleteSchedule(ctx context.Context, id string) error {
 
 func (db *DB) CancelSchedule(ctx context.Context, id string) error {
 	_, err := db.Pool.Exec(ctx,
-		`UPDATE booking_schedules SET status='cancelled', updated_at=NOW() WHERE id=$1 AND status NOT IN ('success','cancelled')`, id)
+		`UPDATE booking_schedules SET status='cancelled', updated_at=NOW() WHERE id=$1 AND status NOT IN ('success','paid','cancelled')`, id)
 	return err
 }
 
@@ -234,13 +237,20 @@ func (db *DB) getStats(ctx context.Context, emailAddr string) (*Stats, error) {
 			COUNT(*),
 			COUNT(*) FILTER (WHERE status = 'pending'),
 			COUNT(*) FILTER (WHERE status IN ('searching','found','booking')),
-			COUNT(*) FILTER (WHERE status = 'success'),
+			COUNT(*) FILTER (WHERE status IN ('success','paid')),
 			COUNT(*) FILTER (WHERE status IN ('failed','expired')),
 			COUNT(*) FILTER (WHERE status = 'cancelled')
 		FROM booking_schedules`+where,
 		args...,
 	).Scan(&s.Total, &s.Pending, &s.Searching, &s.Success, &s.Failed, &s.Cancelled)
 	return &s, err
+}
+
+func (db *DB) UpdateSchedulePaymentStatus(ctx context.Context, id, status string) error {
+	_, err := db.Pool.Exec(ctx,
+		`UPDATE booking_schedules SET status=$1, updated_at=NOW() WHERE id=$2`,
+		status, id)
+	return err
 }
 
 func (db *DB) GetPendingSchedules(ctx context.Context, maxRetries int) ([]BookingSchedule, error) {
@@ -276,7 +286,7 @@ func (db *DB) UpdateScheduleStatus(ctx context.Context, id, status, lastError st
 func (db *DB) UpdateScheduleSuccess(ctx context.Context, id, bookingID, bookingCode, routeName, seatName string, price int, departureTime *time.Time) error {
 	_, err := db.Pool.Exec(ctx,
 		`UPDATE booking_schedules SET
-			booking_id=$1, booking_code=$2, route_name=$3,
+			status='success', booking_id=$1, booking_code=$2, route_name=$3,
 			seat_name=$4, ticket_price=$5, departure_time=$6,
 			updated_at=NOW()
 		WHERE id=$7`,

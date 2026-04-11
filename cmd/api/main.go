@@ -122,6 +122,32 @@ func main() {
 			if s.SeatType == "" {
 				s.SeatType = "any"
 			}
+			if s.SeatFloor == "" {
+				s.SeatFloor = "any"
+			}
+			switch s.SeatFloor {
+			case "any", "up", "down":
+			default:
+				jsonError(w, "seat_floor must be one of: any, up, down", 400)
+				return
+			}
+
+			if s.SeatWindow == "" {
+				s.SeatWindow = "any"
+			}
+			switch s.SeatWindow {
+			case "any", "window", "non_window":
+			default:
+				jsonError(w, "seat_window must be one of: any, window, non_window", 400)
+				return
+			}
+
+			if s.PriorityTopRows < 0 {
+				s.PriorityTopRows = 0
+			}
+			if s.PriorityTopRows > 10 {
+				s.PriorityTopRows = 10
+			}
 
 			if err := db.CreateSchedule(r.Context(), &s); err != nil {
 				jsonError(w, err.Error(), 500)
@@ -162,6 +188,14 @@ func main() {
 				jsonError(w, "schedule not found", 404)
 				return
 			}
+			if s.Status == "paid" {
+				jsonOK(w, map[string]any{
+					"status":         s.Status,
+					"payment_status": "paid",
+					"amount":         s.TicketPrice,
+				})
+				return
+			}
 			if s.Status != "success" || s.BookingCode == "" {
 				jsonOK(w, map[string]any{"status": s.Status, "payment_status": "not_applicable"})
 				return
@@ -174,24 +208,24 @@ func main() {
 			}
 
 			if isPaid {
+				if err := db.UpdateSchedulePaymentStatus(r.Context(), s.ID, "paid"); err != nil {
+					log.Printf("mark schedule paid: %v", err)
+				}
 				jsonOK(w, map[string]any{
-					"status":         s.Status,
+					"status":         "paid",
 					"payment_status": "paid",
 					"amount":         s.TicketPrice,
 				})
-				if err := db.UpdateScheduleStatus(r.Context(), s.ID, "paid", ""); err != nil {
-					log.Printf("mark schedule paid: %v", err)
-				}
 				return
 			} else if time.Since(s.UpdatedAt) > 5*time.Minute {
+				if err := db.UpdateSchedulePaymentStatus(r.Context(), s.ID, "expired"); err != nil {
+					log.Printf("mark schedule payment expired: %v", err)
+				}
 				jsonOK(w, map[string]any{
-					"status":         s.Status,
+					"status":         "expired",
 					"payment_status": "expired",
 					"amount":         s.TicketPrice,
 				})
-				// if err := db.UpdateScheduleStatus(r.Context(), s.ID, "payment_expired", ""); err != nil {
-				// 	log.Printf("mark schedule payment expired: %v", err)
-				// }
 				return
 			}
 
