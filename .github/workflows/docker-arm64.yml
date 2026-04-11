@@ -70,8 +70,8 @@ jobs:
           MESSAGE_TEXT: |
             ✅ *Images Pushed Successfully!*
 
-            *Repository:* ${{ github.repository }}
-            *Actor:* ${{ github.actor }}
+            *Repository:* `${{ github.repository }}`
+            *Actor:* `${{ github.actor }}`
             *Commit message:* `${{ github.event.head_commit.message }}`
 
             Click the button below to trigger the deployment.
