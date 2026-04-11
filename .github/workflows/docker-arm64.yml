@@ -71,9 +71,8 @@ jobs:
             ✅ *Images Pushed Successfully!*
 
             *Repository:* ${{ github.repository }}
-            *Tag:* `${{ github.sha }}`
-            *API:* `${{ env.API_IMAGE }}`
-            *Worker:* `${{ env.WORKER_IMAGE }}`
+            *Actor:* ${{ github.actor }}
+            *Commit message:* `${{ github.event.head_commit.message }}`
 
             Click the button below to trigger the deployment.
         run: |
