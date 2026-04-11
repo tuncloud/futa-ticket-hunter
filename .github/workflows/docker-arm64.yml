@@ -60,3 +60,25 @@ jobs:
         run: |
           docker push ${{ env.WORKER_IMAGE }}:latest
           docker push ${{ env.WORKER_IMAGE }}:${{ github.sha }}
+
+  notify-telegram:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram Notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: markdown
+          message: |
+            ✅ *Images Pushed Successfully!*
+            
+            *Repository:* ${{ github.repository }}
+            *Tag:* `${{ github.sha }}`
+            *API:* `${{ env.API_IMAGE }}`
+            *Worker:* `${{ env.WORKER_IMAGE }}`
+            
+            Click the button below to trigger the deployment.
+          inline_keyboard: |
+            [{"text": "🚀 Deploy to Production", "url": "https://github.com/${{ github.repository }}/actions/workflows/deploy.yml"}]
