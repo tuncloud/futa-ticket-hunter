@@ -131,6 +131,14 @@ input,button,select,textarea{font-family:inherit}
 
 /* ===== TIME ROW ===== */
 .time-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.time-presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
+.preset-label{font-size:12px;font-weight:600;color:var(--text2);margin-right:4px}
+.preset-btn{
+  padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);
+  background:var(--white);font-size:12px;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:all .15s;
+}
+.preset-btn:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-light)}
 .fi select{
   padding:10px 12px;border:1px solid var(--border);
   border-radius:var(--radius-xs);font-size:14px;color:var(--text);
@@ -355,6 +363,8 @@ input,button,select,textarea{font-family:inherit}
 }
 @media(max-width:480px){
   .time-row{grid-template-columns:1fr}
+  .time-presets{margin-top:8px}
+  .preset-label{width:100%;margin-bottom:4px}
   .popular-routes{grid-template-columns:1fr}
   .stats-bar{grid-template-columns:1fr 1fr}
   .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -418,15 +428,21 @@ input,button,select,textarea{font-family:inherit}
             <input type="date" id="fDate" required>
           </div>
           <div class="fi">
-            <label>Khung gio</label>
-            <select id="fTimeSlot">
-              <option value="00:00-23:59">Ca ngay (00:00 - 23:59)</option>
-              <option value="00:00-06:00">Sang som (00:00 - 06:00)</option>
-              <option value="06:00-12:00">Buoi sang (06:00 - 12:00)</option>
-              <option value="12:00-18:00">Buoi chieu (12:00 - 18:00)</option>
-              <option value="18:00-23:59">Buoi toi (18:00 - 24:00)</option>
-            </select>
+            <label>Tu gio</label>
+            <input type="time" id="fTimeFrom" value="00:00">
           </div>
+          <div class="fi">
+            <label>Den gio</label>
+            <input type="time" id="fTimeTo" value="23:59">
+          </div>
+        </div>
+        <div class="time-presets">
+          <span class="preset-label">Khung gio mau:</span>
+          <button type="button" class="preset-btn" data-from="00:00" data-to="23:59">Ca ngay</button>
+          <button type="button" class="preset-btn" data-from="00:00" data-to="06:00">Sang som</button>
+          <button type="button" class="preset-btn" data-from="06:00" data-to="12:00">Buoi sang</button>
+          <button type="button" class="preset-btn" data-from="12:00" data-to="18:00">Buoi chieu</button>
+          <button type="button" class="preset-btn" data-from="18:00" data-to="23:59">Buoi toi</button>
         </div>
       </div>
 
@@ -743,7 +759,11 @@ const tStr=tomorrow.toISOString().split('T')[0];
 $('#fDate').min=new Date().toISOString().split('T')[0];
 $('#fDate').value=tStr;
 
-// (time slot handled by select box)
+// ===== TIME PRESETS =====
+$$('.preset-btn').forEach(b=>b.addEventListener('click',()=>{
+  $('#fTimeFrom').value=b.dataset.from;
+  $('#fTimeTo').value=b.dataset.to;
+}));
 
 // ===== SEAT TYPE =====
 $$('.seat-type-btn').forEach(b=>b.addEventListener('click',()=>{
@@ -790,10 +810,15 @@ $('#createForm').addEventListener('submit',async e=>{
   // Update email display
   if(emailVal){$('#emailDisplay').style.display='flex';$('#emailText').textContent=emailVal;}
 
-  // Parse time slot
-  const timeSlot=$('#fTimeSlot').value.split('-');
-  const timeFrom=timeSlot[0]||'00:00';
-  const timeTo=timeSlot[1]||'23:59';
+  // Get time range
+  const timeFrom=$('#fTimeFrom').value||'00:00';
+  const timeTo=$('#fTimeTo').value||'23:59';
+  
+  // Validate time range
+  if(timeFrom>=timeTo){
+    toast('Thoi gian bat dau phai truoc thoi gian ket thuc','error');
+    return;
+  }
 
   const btn=$('#submitBtn');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Dang tao...';
