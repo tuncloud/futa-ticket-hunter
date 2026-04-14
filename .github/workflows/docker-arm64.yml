@@ -66,19 +66,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send Telegram Notification
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
-          message: |
+        env:
+          MESSAGE_TEXT: |
             ✅ *Images Pushed Successfully!*
-            
-            *Repository:* ${{ github.repository }}
-            *Tag:* `${{ github.sha }}`
-            *API:* `${{ env.API_IMAGE }}`
-            *Worker:* `${{ env.WORKER_IMAGE }}`
-            
+
+            *Repository:* `${{ github.repository }}`
+            *Actor:* `${{ github.actor }}`
+            *Commit message:* `${{ github.event.head_commit.message }}`
+
             Click the button below to trigger the deployment.
-          inline_keyboard: |
-            [{"text": "🚀 Deploy to Production", "url": "https://github.com/${{ github.repository }}/actions/workflows/deploy.yml"}]
+        run: |
+          jq -n \
+            --arg chat_id "${{ secrets.TELEGRAM_CHAT_ID }}" \
+            --arg url "https://github.com/${{ github.repository }}/actions/workflows/deploy.yml" \
+            '{
+              chat_id: $chat_id,
+              text: env.MESSAGE_TEXT,
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: "🚀 Deploy to Production", url: $url }
+                  ]
+                ]
+              }
+            }' > payload.json
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d @payload.json
