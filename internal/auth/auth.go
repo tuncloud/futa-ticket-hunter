@@ -52,7 +52,7 @@ func NewStore() *Store {
 
 // Create stores a new session for the given user and returns the session token.
 func (s *Store) Create(email, name, picture string) string {
-	token := newToken()
+	token := NewToken()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sessions[token] = &Session{
@@ -102,7 +102,15 @@ func (s *Store) gc() {
 	}
 }
 
-func newToken() string {
+// SessionStore is the interface for creating, retrieving, and deleting sessions.
+type SessionStore interface {
+	Create(email, name, picture string) string
+	Get(token string) *Session
+	Delete(token string)
+}
+
+// NewToken generates a cryptographically random session token.
+func NewToken() string {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		panic("auth: crypto/rand failed: " + err.Error())

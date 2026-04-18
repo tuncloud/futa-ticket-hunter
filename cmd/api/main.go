@@ -46,7 +46,18 @@ func main() {
 		log.Println("WARNING: google.client_id is not configured — Google Sign-In will not work")
 	}
 
-	sessions := auth.NewStore()
+	sessions := newDBSessionStore(db)
+
+	// Periodically clean up expired sessions from the database.
+	go func() {
+		ticker := time.NewTicker(time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := db.DeleteExpiredSessions(context.Background()); err != nil {
+				log.Printf("clean expired sessions: %v", err)
+			}
+		}
+	}()
 
 	mux := http.NewServeMux()
 
@@ -81,6 +92,10 @@ func main() {
 			return
 		}
 		token := sessions.Create(info.Email, info.Name, info.Picture)
+		if token == "" {
+			jsonError(w, "failed to create session", http.StatusInternalServerError)
+			return
+		}
 		secure := r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
 		http.SetCookie(w, &http.Cookie{
 			Name:     "futa_session",
@@ -432,7 +447,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 // authMiddleware protects all /api/* routes except /api/auth/* and /api/config.
 // Valid requests have their session attached to the request context.
-func authMiddleware(next http.Handler, sessions *auth.Store) http.Handler {
+func authMiddleware(next http.Handler, sessions auth.SessionStore) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if strings.HasPrefix(path, "/api/") &&
@@ -463,4 +478,38 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
+}
+
+// dbSessionStore is an auth.SessionStore backed by PostgreSQL so that sessions
+// survive server restarts.
+type dbSessionStore struct {
+	db *database.DB
+}
+
+func newDBSessionStore(db *database.DB) *dbSessionStore {
+	return &dbSessionStore{db: db}
+}
+
+func (s *dbSessionStore) Create(email, name, picture string) string {
+	token := auth.NewToken()
+	expiresAt := time.Now().Add(auth.SessionDuration)
+	if err := s.db.CreateSession(context.Background(), token, email, name, picture, expiresAt); err != nil {
+		log.Printf("create session in db: %v", err)
+		return ""
+	}
+	return token
+}
+
+func (s *dbSessionStore) Get(token string) *auth.Session {
+	email, name, picture, createdAt, err := s.db.GetSession(context.Background(), token)
+	if err != nil {
+		return nil
+	}
+	return &auth.Session{Email: email, Name: name, Picture: picture, CreatedAt: createdAt}
+}
+
+func (s *dbSessionStore) Delete(token string) {
+	if err := s.db.DeleteSession(context.Background(), token); err != nil {
+		log.Printf("delete session from db: %v", err)
+	}
 }
