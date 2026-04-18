@@ -1208,6 +1208,11 @@ setInterval(()=>{
   if(currentView==='tickets')loadTickets();
 },10000);
 
+// Re-check auth when page is restored from bfcache (back/forward navigation)
+window.addEventListener('pageshow',function(e){
+  if(e.persisted)checkAuth();
+});
+
 // ===== INIT =====
 checkAuth();
 })();
