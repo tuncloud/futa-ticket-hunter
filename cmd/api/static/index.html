@@ -59,6 +59,17 @@ input,button,select,textarea{font-family:inherit}
 }
 .phone-display svg{width:14px;height:14px;fill:var(--text3)}
 
+/* ===== USER DISPLAY ===== */
+#userDisplay{display:flex;align-items:center;gap:10px}
+#userAvatar{width:30px;height:30px;border-radius:50%;object-fit:cover}
+#userName{font-size:13px;font-weight:500;color:var(--text2)}
+.btn-logout{
+  padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);
+  background:var(--white);font-size:12px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-logout:hover{background:var(--bg);border-color:#ccc}
+
 /* ===== CONTAINER ===== */
 .container{max-width:800px;margin:0 auto;padding:28px 20px}
 
@@ -358,8 +369,17 @@ input,button,select,textarea{font-family:inherit}
   .popular-routes{grid-template-columns:1fr 1fr}
   .stats-bar{grid-template-columns:1fr 1fr}
   .hero{padding:24px 16px}
-  .nav-tabs{margin:0 8px}
   .seat-pref-grid{grid-template-columns:1fr 1fr}
+  /* --- mobile header: two-row layout --- */
+  .top-header{flex-wrap:wrap;height:auto;padding:10px 16px 0;align-content:flex-start}
+  .logo{height:42px}
+  .nav-spacer{flex:1;height:42px}
+  #userDisplay{height:42px;gap:8px}
+  .nav-tabs{
+    order:10;width:calc(100% + 32px);margin:8px -16px 0;
+    padding:4px 8px 8px;border-top:1px solid var(--border-light);gap:4px;
+  }
+  .nav-tabs .nav-tab{flex:1;text-align:center;padding:9px 8px}
 }
 @media(max-width:480px){
   .time-row{grid-template-columns:1fr}
@@ -369,6 +389,9 @@ input,button,select,textarea{font-family:inherit}
   .stats-bar{grid-template-columns:1fr 1fr}
   .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .seat-pref-grid{grid-template-columns:1fr}
+  /* hide user name on very small screens — avatar + button is enough */
+  #userName{display:none}
+  .btn-logout{padding:5px 8px;font-size:11px}
 }
 
 /* ===== LOGIN OVERLAY ===== */
@@ -416,10 +439,10 @@ input,button,select,textarea{font-family:inherit}
     <button class="nav-tab" data-view="tickets">Ve cua toi</button>
   </div>
   <div class="nav-spacer"></div>
-  <div id="userDisplay" style="display:none;align-items:center;gap:10px">
-    <img id="userAvatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;display:none" src="" alt="">
-    <span id="userName" style="font-size:13px;font-weight:500;color:var(--text2)"></span>
-    <button id="logoutBtn" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--white);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s">Dang xuat</button>
+  <div id="userDisplay" style="display:none">
+    <img id="userAvatar" style="display:none" src="" alt="">
+    <span id="userName"></span>
+    <button id="logoutBtn" class="btn-logout">Dang xuat</button>
   </div>
 </header>
 
