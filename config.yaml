@@ -27,3 +27,6 @@ futa:
   user_agent: "FUTA/7.36.4 (com.client.facecar; build:1; iOS 26.2.0) Alamofire/5.9.1"
   app_version: "7.36.4"
   channel: "mobile_app"
+
+google:
+  client_id: "838486469503-ksnr6eohe6s7u2g35ucq7lorl451hpt9.apps.googleusercontent.com"

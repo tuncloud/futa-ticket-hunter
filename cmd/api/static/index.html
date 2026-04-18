@@ -370,9 +370,40 @@ input,button,select,textarea{font-family:inherit}
   .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .seat-pref-grid{grid-template-columns:1fr}
 }
+
+/* ===== LOGIN OVERLAY ===== */
+.login-overlay{
+  position:fixed;inset:0;background:var(--bg);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.login-card{
+  background:var(--white);border-radius:var(--radius);
+  box-shadow:var(--shadow-lg);border:1px solid var(--border-light);
+  padding:40px 32px;text-align:center;max-width:380px;width:100%;
+}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.login-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.login-desc{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.login-actions{display:flex;justify-content:center;min-height:44px}
+.login-error{font-size:12px;color:var(--red);margin-top:16px}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" class="login-overlay" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M17 20H7V4h10v16zm-3-2h1v-2h-1v2zm-4 0h1v-2H10v2zM5 20v2h14v-2H5zM17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg></div>
+      <div class="logo-text">Futa<span>Hunter</span></div>
+    </div>
+    <h2 class="login-title">Chao mung den voi FutaHunter</h2>
+    <p class="login-desc">Dang nhap bang tai khoan Google de bat dau san ve xe Phuong Trang tu dong</p>
+    <div class="login-actions" id="googleSignInBtn"></div>
+    <p id="loginError" class="login-error" style="display:none">Khong the tai Google Sign-In. Vui long thu lai sau.</p>
+  </div>
+</div>
 
 <!-- TOP HEADER -->
 <header class="top-header">
@@ -385,10 +416,10 @@ input,button,select,textarea{font-family:inherit}
     <button class="nav-tab" data-view="tickets">Ve cua toi</button>
   </div>
   <div class="nav-spacer"></div>
-  <div class="phone-display" id="emailDisplay" style="display:none">
-    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-    <span id="emailText"></span>
-    <button id="changeEmailBtn" style="margin-left:8px;background:none;border:none;color:var(--brand);cursor:pointer;font-size:12px;text-decoration:underline;padding:0;font-weight:600">Thay doi</button>
+  <div id="userDisplay" style="display:none;align-items:center;gap:10px">
+    <img id="userAvatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;display:none" src="" alt="">
+    <span id="userName" style="font-size:13px;font-weight:500;color:var(--text2)"></span>
+    <button id="logoutBtn" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--white);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s">Dang xuat</button>
   </div>
 </header>
 
@@ -593,6 +624,7 @@ function setCookie(name,value,days){
 
 // ===== STATE =====
 let currentView='search';
+let currentUser=null;
 let seatCount=1;
 let seatType='any';
 let seatFloor='any';
@@ -610,22 +642,12 @@ let destAreaID='';
 let destName='';
 
 // ===== INIT COOKIES =====
-const savedEmail=getCookie('futa_email');
 const savedName=getCookie('futa_name');
 const savedPhone=getCookie('futa_phone');
-if(savedEmail){
-  $('#fEmail').value=savedEmail;
-  $('#emailDisplay').style.display='flex';
-  $('#emailText').textContent=savedEmail;
-}
 if(savedName)$('#fName').value=savedName;
 if(savedPhone)$('#fPhone').value=savedPhone;
 
-// Save to cookie on change
-$('#fEmail').addEventListener('change',function(){
-  const v=this.value.trim();
-  if(v){setCookie('futa_email',v,365);$('#emailDisplay').style.display='flex';$('#emailText').textContent=v;}
-});
+// Save name/phone to cookie on change
 $('#fName').addEventListener('change',function(){
   const v=this.value.trim();if(v)setCookie('futa_name',v,365);
 });
@@ -647,12 +669,79 @@ $$('.nav-tab[data-view]').forEach(t=>t.addEventListener('click',()=>goToView(t.d
 $('#logoBtn').addEventListener('click',()=>goToView('search'));
 $('#ticketCreateBtn').addEventListener('click',()=>goToView('search'));
 
-$('#changeEmailBtn').addEventListener('click',()=>{
+// ===== GOOGLE AUTH =====
+async function checkAuth(){
+  try{
+    const resp=await fetch('/api/auth/me');
+    if(resp.ok){
+      const user=await resp.json();
+      onAuthSuccess(user);
+    }else{
+      showLoginScreen();
+    }
+  }catch(e){showLoginScreen();}
+}
+
+async function showLoginScreen(){
+  $('#loginOverlay').style.display='flex';
+  try{
+    const cfg=await fetch('/api/config').then(r=>r.json());
+    if(!cfg.google_client_id){
+      $('#loginError').textContent='Google Sign-In is not available. Please contact the administrator.';
+      $('#loginError').style.display='block';
+      return;
+    }
+    // Wait up to 5 s for Google library to load
+    let attempts=0;
+    while(!window.google?.accounts?.id&&attempts<50){
+      await new Promise(r=>setTimeout(r,100));
+      attempts++;
+    }
+    if(!window.google?.accounts?.id){
+      $('#loginError').style.display='block';
+      return;
+    }
+    google.accounts.id.initialize({client_id:cfg.google_client_id,callback:handleGoogleSignIn});
+    google.accounts.id.renderButton($('#googleSignInBtn'),{theme:'outline',size:'large',text:'signin_with',locale:'vi'});
+  }catch(e){$('#loginError').style.display='block';}
+}
+
+async function handleGoogleSignIn(response){
+  try{
+    const resp=await fetch('/api/auth/google',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id_token:response.credential})
+    });
+    if(!resp.ok)throw new Error('Dang nhap that bai');
+    const user=await resp.json();
+    $('#loginOverlay').style.display='none';
+    onAuthSuccess(user);
+  }catch(e){toast(e.message,'error');}
+}
+
+function onAuthSuccess(user){
+  currentUser=user;
+  $('#userDisplay').style.display='flex';
+  $('#userName').textContent=user.name||user.email;
+  if(user.picture){
+    $('#userAvatar').src=user.picture;
+    $('#userAvatar').style.display='block';
+  }
+  // Pre-fill email from Google account
+  if(user.email&&!$('#fEmail').value){
+    $('#fEmail').value=user.email;
+    setCookie('futa_email',user.email,365);
+  }
+  loadRecent();
+}
+
+$('#logoutBtn').addEventListener('click',async()=>{
+  await fetch('/api/auth/logout',{method:'POST'});
+  currentUser=null;
   setCookie('futa_email','',-1);
-  $('#emailDisplay').style.display='none';
-  $('#fEmail').value='';
-  goToView('search');
-  $('#fEmail').focus();
+  setCookie('futa_name','',-1);
+  setCookie('futa_phone','',-1);
+  location.reload();
 });
 
 // ===== AUTOCOMPLETE =====
@@ -803,12 +892,8 @@ $('#createForm').addEventListener('submit',async e=>{
   const emailVal=$('#fEmail').value.trim();
   const name=$('#fName').value.trim();
   const phone=$('#fPhone').value.trim();
-  if(emailVal)setCookie('futa_email',emailVal,365);
   if(name)setCookie('futa_name',name,365);
   if(phone)setCookie('futa_phone',phone,365);
-
-  // Update email display
-  if(emailVal){$('#emailDisplay').style.display='flex';$('#emailText').textContent=emailVal;}
 
   // Get time range
   const timeFrom=$('#fTimeFrom').value||'00:00';
@@ -861,9 +946,9 @@ $('#createForm').addEventListener('submit',async e=>{
 
 // ===== TICKETS VIEW =====
 async function loadTickets(){
-  const em=getCookie('futa_email');
+  const em=currentUser?currentUser.email:getCookie('futa_email');
   if(!em){
-    $('#ticketList').innerHTML='<div class="empty-state"><p>Nhap email o trang chu de xem ve cua ban</p></div>';
+    $('#ticketList').innerHTML='<div class="empty-state"><p>Chua co thong tin nguoi dung</p></div>';
     return;
   }
   try{
@@ -982,7 +1067,7 @@ $$('.filter-tab').forEach(tab=>tab.addEventListener('click',()=>{
 
 // ===== RECENT =====
 async function loadRecent(){
-  const em=getCookie('futa_email');
+  const em=currentUser?currentUser.email:getCookie('futa_email');
   if(!em){$('#recentSection').style.display='none';return;}
   try{
     const resp=await fetch('/api/schedules/recent?email='+encodeURIComponent(em));
@@ -1067,7 +1152,7 @@ setInterval(()=>{
 },10000);
 
 // ===== INIT =====
-loadRecent();
+checkAuth();
 })();
 </script>
 </body>
