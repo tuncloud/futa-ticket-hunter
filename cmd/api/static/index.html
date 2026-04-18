@@ -7,6 +7,9 @@
 <title>FutaHunter — San Ve Phuong Trang</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub)"},o="init me capture alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -622,7 +625,26 @@ function setCookie(name,value,days){
   document.cookie=name+'='+encodeURIComponent(value)+';expires='+d.toUTCString()+';path=/;SameSite=Strict';
 }
 
-// ===== STATE =====
+// ===== POSTHOG =====
+let posthogReady=false;
+async function initPosthog(){
+  if(posthogReady)return;
+  try{
+    const cfg=await fetch('/api/config').then(r=>r.json());
+    if(cfg.posthog_api_key&&cfg.posthog_api_key.trim()){
+      posthog.init(cfg.posthog_api_key.trim(),{
+        api_host:cfg.posthog_host||'https://us.i.posthog.com',
+        person_profiles:'identified_only',
+        capture_pageview:false,
+      });
+      posthogReady=true;
+      posthog.capture('$pageview');
+    }
+  }catch(e){console.error('posthog init:',e);}
+}
+initPosthog();
+
+
 let currentView='search';
 let currentUser=null;
 let seatCount=1;
@@ -661,6 +683,7 @@ function goToView(view){
   $$('.nav-tab[data-view]').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
   $('#viewSearch').style.display=view==='search'?'block':'none';
   $('#viewTickets').style.display=view==='tickets'?'block':'none';
+  if(posthogReady)posthog.capture('view_changed',{view});
   if(view==='tickets')loadTickets();
   if(view==='search')loadRecent();
 }
@@ -727,6 +750,9 @@ function onAuthSuccess(user){
     $('#userAvatar').src=user.picture;
     $('#userAvatar').style.display='block';
   }
+  if(posthogReady){
+    posthog.identify(user.email,{name:user.name,email:user.email});
+  }
   // Pre-fill email from Google account
   if(user.email&&!$('#fEmail').value){
     $('#fEmail').value=user.email;
@@ -737,6 +763,7 @@ function onAuthSuccess(user){
 
 $('#logoutBtn').addEventListener('click',async()=>{
   await fetch('/api/auth/logout',{method:'POST'});
+  if(posthogReady)posthog.reset();
   currentUser=null;
   setCookie('futa_email','',-1);
   setCookie('futa_name','',-1);
@@ -931,6 +958,11 @@ $('#createForm').addEventListener('submit',async e=>{
       body:JSON.stringify(data)
     });
     if(!resp.ok){const e=await resp.json();throw new Error(e.error||'Loi')}
+    if(posthogReady)posthog.capture('schedule_created',{
+      origin:originName,dest:destName,
+      travel_date:data.travel_date,seat_type:seatType,seat_count:seatCount,
+      auto_book:autoBook,
+    });
     toast('Tao yeu cau san ve thanh cong!');
     // Reset route fields
     $('#fOrigin').value='';$('#fDest').value='';
@@ -1093,11 +1125,13 @@ window.app={
   async cancel(id){
     if(!confirm('Huy yeu cau nay?'))return;
     await fetch(`/api/schedules/${id}/cancel`,{method:'POST'});
+    if(posthogReady)posthog.capture('schedule_cancelled',{schedule_id:id});
     toast('Da huy yeu cau');loadTickets();
   },
   async remove(id){
     if(!confirm('Xoa yeu cau nay?'))return;
     await fetch(`/api/schedules/${id}`,{method:'DELETE'});
+    if(posthogReady)posthog.capture('schedule_deleted',{schedule_id:id});
     toast('Da xoa');loadTickets();
   }
 };
