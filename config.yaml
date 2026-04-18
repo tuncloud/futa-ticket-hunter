@@ -30,3 +30,7 @@ futa:
 
 google:
   client_id: "838486469503-ksnr6eohe6s7u2g35ucq7lorl451hpt9.apps.googleusercontent.com"
+
+posthog:
+  api_key: ""
+  host: "https://us.i.posthog.com"

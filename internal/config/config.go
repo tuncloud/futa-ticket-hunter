@@ -15,6 +15,12 @@ type Config struct {
 	Email    EmailConfig    `yaml:"email"`
 	Futa     FutaConfig     `yaml:"futa"`
 	Google   GoogleConfig   `yaml:"google"`
+	Posthog  PosthogConfig  `yaml:"posthog"`
+}
+
+type PosthogConfig struct {
+	APIKey string `yaml:"api_key"`
+	Host   string `yaml:"host"`
 }
 
 type GoogleConfig struct {

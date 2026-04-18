@@ -54,7 +54,11 @@ func main() {
 
 	// Public config (exposes non-secret runtime config to the frontend)
 	mux.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
-		jsonOK(w, map[string]string{"google_client_id": cfg.Google.ClientID})
+		jsonOK(w, map[string]string{
+			"google_client_id": cfg.Google.ClientID,
+			"posthog_api_key":  cfg.Posthog.APIKey,
+			"posthog_host":     cfg.Posthog.Host,
+		})
 	})
 
 	// Sign in with Google: verify ID token, create session
