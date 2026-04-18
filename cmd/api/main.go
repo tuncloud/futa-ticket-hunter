@@ -111,6 +111,7 @@ func main() {
 
 	// Get current authenticated user
 	mux.HandleFunc("/api/auth/me", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
 		cookie, err := r.Cookie("futa_session")
 		if err != nil || cookie.Value == "" {
 			jsonError(w, "unauthorized", http.StatusUnauthorized)
@@ -406,6 +407,13 @@ func main() {
 			if r.URL.Path != "/" && !strings.Contains(r.URL.Path, ".") {
 				r.URL.Path = "/"
 			}
+		}
+		// Prevent browsers from caching the HTML shell so that a fresh
+		// page load always runs checkAuth() with up-to-date JS/HTML.
+		if r.URL.Path == "/" || r.URL.Path == "/index.html" || !strings.Contains(r.URL.Path, ".") {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
 		}
 		fileServer.ServeHTTP(w, r)
 	})
