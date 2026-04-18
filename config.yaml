@@ -32,5 +32,5 @@ google:
   client_id: "838486469503-ksnr6eohe6s7u2g35ucq7lorl451hpt9.apps.googleusercontent.com"
 
 posthog:
-  api_key: ""
+  api_key: "phc_4n50GvMzI3AWztKFdYOhD8BFY2G1qotI6zqk0OAZU5k"
   host: "https://us.i.posthog.com"
