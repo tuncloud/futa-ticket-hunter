@@ -332,3 +332,35 @@ func (db *DB) getRecentSchedules(ctx context.Context, emailAddr string, limit in
 	}
 	return results, nil
 }
+
+// === Sessions ===
+
+// CreateSession stores a new session token in the database.
+func (db *DB) CreateSession(ctx context.Context, token, email, name, picture string, expiresAt time.Time) error {
+	_, err := db.Pool.Exec(ctx,
+		`INSERT INTO sessions (token, email, name, picture, expires_at)
+		 VALUES ($1, $2, $3, $4, $5)`,
+		token, email, name, picture, expiresAt)
+	return err
+}
+
+// GetSession returns the email, name, picture, and created_at for a non-expired token.
+// Returns pgx.ErrNoRows (wrapped) if the token does not exist or has expired.
+func (db *DB) GetSession(ctx context.Context, token string) (email, name, picture string, createdAt time.Time, err error) {
+	err = db.Pool.QueryRow(ctx,
+		`SELECT email, name, picture, created_at FROM sessions WHERE token = $1 AND expires_at > NOW()`,
+		token).Scan(&email, &name, &picture, &createdAt)
+	return
+}
+
+// DeleteSession removes a session by token.
+func (db *DB) DeleteSession(ctx context.Context, token string) error {
+	_, err := db.Pool.Exec(ctx, `DELETE FROM sessions WHERE token = $1`, token)
+	return err
+}
+
+// DeleteExpiredSessions removes all expired sessions from the database.
+func (db *DB) DeleteExpiredSessions(ctx context.Context) error {
+	_, err := db.Pool.Exec(ctx, `DELETE FROM sessions WHERE expires_at <= NOW()`)
+	return err
+}
