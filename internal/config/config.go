@@ -14,6 +14,11 @@ type Config struct {
 	Webhook  WebhookConfig  `yaml:"webhook"`
 	Email    EmailConfig    `yaml:"email"`
 	Futa     FutaConfig     `yaml:"futa"`
+	Google   GoogleConfig   `yaml:"google"`
+}
+
+type GoogleConfig struct {
+	ClientID string `yaml:"client_id"`
 }
 
 type ServerConfig struct {

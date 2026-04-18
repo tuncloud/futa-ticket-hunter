@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/tuandoquoc/futa-ticket-hunter/internal/auth"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/config"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/database"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/futa"
@@ -41,7 +42,90 @@ func main() {
 
 	futaClient := futa.NewClient(cfg.Futa)
 
+	if cfg.Google.ClientID == "" {
+		log.Println("WARNING: google.client_id is not configured — Google Sign-In will not work")
+	}
+
+	sessions := auth.NewStore()
+
 	mux := http.NewServeMux()
+
+	// === Auth Routes (public) ===
+
+	// Public config (exposes non-secret runtime config to the frontend)
+	mux.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
+		jsonOK(w, map[string]string{"google_client_id": cfg.Google.ClientID})
+	})
+
+	// Sign in with Google: verify ID token, create session
+	mux.HandleFunc("/api/auth/google", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var req struct {
+			IDToken string `json:"id_token"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.IDToken == "" {
+			jsonError(w, "id_token is required", http.StatusBadRequest)
+			return
+		}
+		info, err := auth.VerifyGoogleIDToken(req.IDToken, cfg.Google.ClientID)
+		if err != nil {
+			log.Printf("google auth: %v", err)
+			jsonError(w, "authentication failed", http.StatusUnauthorized)
+			return
+		}
+		token := sessions.Create(info.Email, info.Name, info.Picture)
+		secure := r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
+		http.SetCookie(w, &http.Cookie{
+			Name:     "futa_session",
+			Value:    token,
+			Path:     "/",
+			MaxAge:   int(auth.SessionDuration / time.Second),
+			HttpOnly: true,
+			Secure:   secure,
+			SameSite: http.SameSiteLaxMode,
+		})
+		jsonOK(w, map[string]string{"email": info.Email, "name": info.Name, "picture": info.Picture})
+	})
+
+	// Get current authenticated user
+	mux.HandleFunc("/api/auth/me", func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("futa_session")
+		if err != nil || cookie.Value == "" {
+			jsonError(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		sess := sessions.Get(cookie.Value)
+		if sess == nil {
+			jsonError(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		jsonOK(w, map[string]string{"email": sess.Email, "name": sess.Name, "picture": sess.Picture})
+	})
+
+	// Logout: delete session and clear cookie
+	mux.HandleFunc("/api/auth/logout", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if cookie, err := r.Cookie("futa_session"); err == nil && cookie.Value != "" {
+			sessions.Delete(cookie.Value)
+		}
+		secure := r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
+		http.SetCookie(w, &http.Cookie{
+			Name:     "futa_session",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   secure,
+			SameSite: http.SameSiteLaxMode,
+		})
+		jsonOK(w, map[string]string{"message": "logged out"})
+	})
 
 	// === API Routes ===
 
@@ -309,7 +393,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
-		Handler: corsMiddleware(mux),
+		Handler: corsMiddleware(authMiddleware(mux, sessions)),
 	}
 
 	go func() {
@@ -337,6 +421,30 @@ func corsMiddleware(next http.Handler) http.Handler {
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// authMiddleware protects all /api/* routes except /api/auth/* and /api/config.
+// Valid requests have their session attached to the request context.
+func authMiddleware(next http.Handler, sessions *auth.Store) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if strings.HasPrefix(path, "/api/") &&
+			!strings.HasPrefix(path, "/api/auth/") &&
+			path != "/api/config" {
+			cookie, err := r.Cookie("futa_session")
+			if err != nil || cookie.Value == "" {
+				jsonError(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			sess := sessions.Get(cookie.Value)
+			if sess == nil {
+				jsonError(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			r = r.WithContext(context.WithValue(r.Context(), auth.SessionKey, sess))
 		}
 		next.ServeHTTP(w, r)
 	})
