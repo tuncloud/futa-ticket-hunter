@@ -410,7 +410,7 @@ func main() {
 		}
 		// Prevent browsers from caching the HTML shell so that a fresh
 		// page load always runs checkAuth() with up-to-date JS/HTML.
-		if r.URL.Path == "/" || r.URL.Path == "/index.html" || !strings.Contains(r.URL.Path, ".") {
+		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
 			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			w.Header().Set("Pragma", "no-cache")
 			w.Header().Set("Expires", "0")
