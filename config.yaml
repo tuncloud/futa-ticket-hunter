@@ -12,7 +12,7 @@ worker:
   poll_interval: 5s
   max_retries: 3
   concurrency: 5
-  retry_delay: 30s
+  retry_delay: 1s
 
 webhook:
   url: "https://workflow.tuando.app/webhook/e0d886bd-59d1-4a95-b596-71fc67b265bd"
