@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/tuandoquoc/futa-ticket-hunter/internal/config"
 )
@@ -251,6 +253,43 @@ func (db *DB) UpdateSchedulePaymentStatus(ctx context.Context, id, status string
 		`UPDATE booking_schedules SET status=$1, updated_at=NOW() WHERE id=$2`,
 		status, id)
 	return err
+}
+
+// ClaimNextSchedule atomically claims the next available schedule using
+// FOR UPDATE SKIP LOCKED, making it safe to run multiple concurrent workers
+// or goroutines against the same database. The claimed row is immediately
+// updated so that it will not be visible to other callers until retryDelay
+// has elapsed, providing crash-recovery: if the worker dies mid-processing
+// the job becomes available again automatically.
+// Returns nil, nil when there is no claimable job.
+func (db *DB) ClaimNextSchedule(ctx context.Context, retryDelay time.Duration) (*BookingSchedule, error) {
+	row := db.Pool.QueryRow(ctx, `
+		WITH next_job AS (
+			SELECT id FROM booking_schedules
+			WHERE status IN ('pending', 'searching')
+			AND travel_date >= CURRENT_DATE
+			AND (next_retry_at IS NULL OR next_retry_at <= NOW())
+			ORDER BY travel_date ASC, created_at ASC
+			LIMIT 1 FOR UPDATE SKIP LOCKED
+		)
+		UPDATE booking_schedules
+		SET status = 'searching',
+		    retry_count = retry_count + 1,
+		    next_retry_at = NOW() + $1,
+		    updated_at = NOW()
+		FROM next_job
+		WHERE booking_schedules.id = next_job.id
+		RETURNING `+scheduleColumns,
+		retryDelay,
+	)
+	s, err := scanSchedule(row.Scan)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return s, nil
 }
 
 func (db *DB) GetPendingSchedules(ctx context.Context, maxRetries int) ([]BookingSchedule, error) {

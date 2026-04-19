@@ -43,6 +43,8 @@ type DatabaseConfig struct {
 type WorkerConfig struct {
 	PollInterval time.Duration `yaml:"poll_interval"`
 	MaxRetries   int           `yaml:"max_retries"`
+	Concurrency  int           `yaml:"concurrency"`
+	RetryDelay   time.Duration `yaml:"retry_delay"`
 }
 
 type WebhookConfig struct {
@@ -81,6 +83,12 @@ func Load(path string) (*Config, error) {
 	}
 	if cfg.Worker.MaxRetries == 0 {
 		cfg.Worker.MaxRetries = 3
+	}
+	if cfg.Worker.Concurrency <= 0 {
+		cfg.Worker.Concurrency = 5
+	}
+	if cfg.Worker.RetryDelay == 0 {
+		cfg.Worker.RetryDelay = 30 * time.Second
 	}
 	return &cfg, nil
 }
