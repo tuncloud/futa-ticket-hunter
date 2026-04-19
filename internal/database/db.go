@@ -279,7 +279,7 @@ func (db *DB) ClaimNextSchedule(ctx context.Context, retryDelay time.Duration) (
 		    updated_at = NOW()
 		FROM next_job
 		WHERE booking_schedules.id = next_job.id
-		RETURNING `+scheduleColumns,
+		RETURNING booking_schedules.`+scheduleColumns,
 		retryDelay,
 	)
 	s, err := scanSchedule(row.Scan)
