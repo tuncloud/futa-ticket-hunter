@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"sort"
+	"sync"
 	"syscall"
 	"time"
 
@@ -47,52 +48,61 @@ func main() {
 		cancel()
 	}()
 
-	log.Printf("Worker started, polling every %s", cfg.Worker.PollInterval)
+	log.Printf("Worker started: concurrency=%d poll_interval=%s retry_delay=%s",
+		cfg.Worker.Concurrency, cfg.Worker.PollInterval, cfg.Worker.RetryDelay)
 
-	ticker := time.NewTicker(cfg.Worker.PollInterval)
-	defer ticker.Stop()
-
-	processSchedules(ctx, db, futaClient, cfg)
-	for {
-		select {
-		case <-ctx.Done():
-			log.Println("Worker stopped")
-			return
-		case <-ticker.C:
-			processSchedules(ctx, db, futaClient, cfg)
-		}
+	var wg sync.WaitGroup
+	for i := 0; i < cfg.Worker.Concurrency; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			runWorkerLoop(ctx, id, db, futaClient, cfg)
+		}(i)
 	}
+	wg.Wait()
+	log.Println("Worker stopped")
 }
 
-func processSchedules(ctx context.Context, db *database.DB, client *futa.Client, cfg *config.Config) {
+// runWorkerLoop is the main loop for a single worker goroutine. It continuously
+// tries to claim and process one job at a time. When no job is available it
+// backs off for PollInterval before trying again.
+func runWorkerLoop(ctx context.Context, id int, db *database.DB, client *futa.Client, cfg *config.Config) {
 	wh := webhook.NewSender(cfg.Webhook)
 	em := email.NewSender(cfg.Email)
 
-	schedules, err := db.GetPendingSchedules(ctx, cfg.Worker.MaxRetries)
-	if err != nil {
-		log.Printf("ERROR get pending schedules: %v", err)
-		return
-	}
-
-	if len(schedules) == 0 {
-		return
-	}
-
-	log.Printf("Processing %d pending schedule(s)", len(schedules))
-
-	for _, s := range schedules {
+	for {
 		if ctx.Err() != nil {
 			return
 		}
-		processOne(ctx, db, client, wh, em, s)
+
+		s, err := db.ClaimNextSchedule(ctx, cfg.Worker.RetryDelay)
+		if err != nil {
+			log.Printf("[worker-%d] ERROR claiming schedule: %v", id, err)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(cfg.Worker.PollInterval):
+			}
+			continue
+		}
+
+		if s == nil {
+			// No job available — wait before polling again.
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(cfg.Worker.PollInterval):
+			}
+			continue
+		}
+
+		processOne(ctx, db, client, wh, em, *s)
 	}
 }
 
 func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *webhook.Sender, em *email.Sender, s database.BookingSchedule) {
 	log.Printf("[%s] Processing: %s -> %s on %s (%s-%s)",
 		s.ID[:8], s.OriginName, s.DestName, s.TravelDate, s.TimeFrom, s.TimeTo)
-
-	db.UpdateScheduleStatus(ctx, s.ID, "searching", "")
 
 	originAreaID := s.OriginAreaID
 	destAreaID := s.DestAreaID
