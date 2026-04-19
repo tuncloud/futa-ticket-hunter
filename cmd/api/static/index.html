@@ -418,7 +418,7 @@ input,button,select,textarea{font-family:inherit}
 <body>
 
 <!-- LOGIN OVERLAY -->
-<div id="loginOverlay" class="login-overlay" style="display:none">
+<div id="loginOverlay" class="login-overlay">
   <div class="login-card">
     <div class="login-logo">
       <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M17 20H7V4h10v16zm-3-2h1v-2h-1v2zm-4 0h1v-2H10v2zM5 20v2h14v-2H5zM17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg></div>
@@ -767,6 +767,7 @@ async function handleGoogleSignIn(response){
 
 function onAuthSuccess(user){
   currentUser=user;
+  $('#loginOverlay').style.display='none';
   $('#userDisplay').style.display='flex';
   $('#userName').textContent=user.name||user.email;
   if(user.picture){
