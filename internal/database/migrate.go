@@ -25,16 +25,16 @@ func ResolveMigrationsDir(cfgPath string) string {
 		candidates = append(candidates, filepath.Join(filepath.Dir(exe), "migrations"))
 	}
 
-	seen := map[string]bool{}
+	seen := map[string]struct{}{}
 	for _, c := range candidates {
 		if c == "" {
 			continue
 		}
 		clean := filepath.Clean(c)
-		if seen[clean] {
+		if _, ok := seen[clean]; ok {
 			continue
 		}
-		seen[clean] = true
+		seen[clean] = struct{}{}
 
 		info, err := os.Stat(clean)
 		if err == nil && info.IsDir() {
@@ -46,6 +46,11 @@ func ResolveMigrationsDir(cfgPath string) string {
 }
 
 func (db *DB) RunMigrations(ctx context.Context, migrationsDir string) error {
+	info, err := os.Stat(migrationsDir)
+	if err != nil || !info.IsDir() {
+		return fmt.Errorf("migrations directory not found: %s", migrationsDir)
+	}
+
 	files, err := filepath.Glob(filepath.Join(migrationsDir, "*.sql"))
 	if err != nil {
 		return fmt.Errorf("find migration files: %w", err)
