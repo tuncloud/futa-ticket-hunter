@@ -180,7 +180,7 @@ input,button,select,textarea{font-family:inherit}
 }
 .seat-counter button:hover{background:var(--orange-light);color:var(--orange)}
 .seat-counter .val{width:40px;text-align:center;font-size:16px;font-weight:700;color:var(--text)}
-.seat-pref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.seat-pref-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
 
 /* ===== PASSENGER ===== */
 .passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -545,6 +545,10 @@ input,button,select,textarea{font-family:inherit}
               <option value="3">3 hang dau</option>
             </select>
           </div>
+          <div class="fi">
+            <label>Gia ve toi da (VND)</label>
+            <input type="number" id="fMaxPrice" placeholder="0 = khong gioi han" min="0" step="1000">
+          </div>
         </div>
       </div>
 
@@ -675,6 +679,7 @@ let seatType='any';
 let seatFloor='any';
 let seatWindow='any';
 let priorityTopRows=0;
+let maxPrice=0;
 let autoBook=true;
 let currentFilter='all';
 const paymentTerminalBySchedule={};
@@ -919,6 +924,7 @@ $('#seatPlus').addEventListener('click',()=>{if(seatCount<5){seatCount++;$('#sea
 $('#fSeatFloor').addEventListener('change',function(){seatFloor=this.value||'any';});
 $('#fSeatWindow').addEventListener('change',function(){seatWindow=this.value||'any';});
 $('#fPriorityTopRows').addEventListener('change',function(){priorityTopRows=parseInt(this.value||'0',10)||0;});
+$('#fMaxPrice').addEventListener('input',function(){maxPrice=parseInt(this.value||'0',10)||0;if(maxPrice<0)maxPrice=0;});
 
 // ===== AUTO BOOK =====
 $('#autoBookToggle').addEventListener('click',()=>{
@@ -971,6 +977,7 @@ $('#createForm').addEventListener('submit',async e=>{
     seat_floor:seatFloor,
     seat_window:seatWindow,
     priority_top_rows:priorityTopRows,
+    max_price:maxPrice,
     auto_book:autoBook,
     passenger_name:name,
     passenger_phone:phone,

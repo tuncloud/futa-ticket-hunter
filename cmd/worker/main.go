@@ -172,6 +172,11 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			}
 		}
 
+		// Filter by max price
+		if s.MaxPrice > 0 && trip.Price > s.MaxPrice {
+			continue
+		}
+
 		// If not auto_book, just mark as found
 		if !s.AutoBook {
 			db.UpdateScheduleStatus(ctx, s.ID, "found", fmt.Sprintf("Found trip %s at %s, %d empty seats", trip.TripID, trip.RawDepartureTime, trip.EmptySeatQuantity))

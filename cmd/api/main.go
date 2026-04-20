@@ -253,6 +253,10 @@ func main() {
 				s.PriorityTopRows = 10
 			}
 
+			if s.MaxPrice < 0 {
+				s.MaxPrice = 0
+			}
+
 			if err := db.CreateSchedule(r.Context(), &s); err != nil {
 				jsonError(w, err.Error(), 500)
 				return

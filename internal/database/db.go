@@ -30,6 +30,7 @@ type BookingSchedule struct {
 	SeatFloor       string `json:"seat_floor"`
 	SeatWindow      string `json:"seat_window"`
 	PriorityTopRows int    `json:"priority_top_rows"`
+	MaxPrice        int    `json:"max_price"`
 	AutoBook        bool   `json:"auto_book"`
 
 	PassengerName  string `json:"passenger_name"`
@@ -92,7 +93,7 @@ const scheduleColumns = `id,
 	origin_area_id, origin_name,
 	dest_area_id, dest_name,
 	travel_date, time_from, time_to,
-	seat_type, seat_count, seat_floor, seat_window, priority_top_rows, auto_book,
+	seat_type, seat_count, seat_floor, seat_window, priority_top_rows, max_price, auto_book,
 	passenger_name, passenger_phone, passenger_email,
 	status, booking_id, booking_code, ticket_price,
 	seat_name, departure_time,
@@ -107,7 +108,7 @@ func scanSchedule(scan func(dest ...any) error) (*BookingSchedule, error) {
 		&s.OriginAreaID, &s.OriginName,
 		&s.DestAreaID, &s.DestName,
 		&travelDate, &s.TimeFrom, &s.TimeTo,
-		&s.SeatType, &s.SeatCount, &s.SeatFloor, &s.SeatWindow, &s.PriorityTopRows, &s.AutoBook,
+		&s.SeatType, &s.SeatCount, &s.SeatFloor, &s.SeatWindow, &s.PriorityTopRows, &s.MaxPrice, &s.AutoBook,
 		&s.PassengerName, &s.PassengerPhone, &s.PassengerEmail,
 		&s.Status, &s.BookingID, &s.BookingCode, &s.TicketPrice,
 		&s.SeatName, &s.DepartureTime,
@@ -128,15 +129,15 @@ func (db *DB) CreateSchedule(ctx context.Context, s *BookingSchedule) error {
 			origin_area_id, origin_name,
 			dest_area_id, dest_name,
 			travel_date, time_from, time_to,
-			seat_type, seat_count, seat_floor, seat_window, priority_top_rows, auto_book,
+			seat_type, seat_count, seat_floor, seat_window, priority_top_rows, max_price, auto_book,
 			passenger_name, passenger_phone, passenger_email,
 			status
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'pending')
+		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'pending')
 		RETURNING id, created_at, updated_at`,
 		s.OriginAreaID, s.OriginName,
 		s.DestAreaID, s.DestName,
 		s.TravelDate, s.TimeFrom, s.TimeTo,
-		s.SeatType, s.SeatCount, s.SeatFloor, s.SeatWindow, s.PriorityTopRows, s.AutoBook,
+		s.SeatType, s.SeatCount, s.SeatFloor, s.SeatWindow, s.PriorityTopRows, s.MaxPrice, s.AutoBook,
 		s.PassengerName, s.PassengerPhone, s.PassengerEmail,
 	).Scan(&s.ID, &s.CreatedAt, &s.UpdatedAt)
 }
