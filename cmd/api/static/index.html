@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FutaHunter — San Ve Phuong Trang</title>
+<title>FutaHunter — Săn Vé Phương Trang</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
@@ -424,10 +424,10 @@ input,button,select,textarea{font-family:inherit}
       <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M17 20H7V4h10v16zm-3-2h1v-2h-1v2zm-4 0h1v-2H10v2zM5 20v2h14v-2H5zM17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg></div>
       <div class="logo-text">Futa<span>Hunter</span></div>
     </div>
-    <h2 class="login-title">Chao mung den voi FutaHunter</h2>
-    <p class="login-desc">Dang nhap bang tai khoan Google de bat dau san ve xe Phuong Trang tu dong</p>
+    <h2 class="login-title">Chào mừng đến với FutaHunter</h2>
+    <p class="login-desc">Đăng nhập bằng tài khoản Google để bắt đầu săn vé xe Phương Trang tự động</p>
     <div class="login-actions" id="googleSignInBtn"></div>
-    <p id="loginError" class="login-error" style="display:none">Khong the tai Google Sign-In. Vui long thu lai sau.</p>
+    <p id="loginError" class="login-error" style="display:none">Không thể tải Google Sign-In. Vui lòng thử lại sau.</p>
   </div>
 </div>
 
@@ -438,14 +438,14 @@ input,button,select,textarea{font-family:inherit}
     <div class="logo-text">Futa<span>Hunter</span></div>
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-view="search">Trang chu</button>
-    <button class="nav-tab" data-view="tickets">Ve cua toi</button>
+    <button class="nav-tab active" data-view="search">Trang chủ</button>
+    <button class="nav-tab" data-view="tickets">Vé của tôi</button>
   </div>
   <div class="nav-spacer"></div>
   <div id="userDisplay" style="display:none">
     <img id="userAvatar" style="display:none" src="" alt="">
     <span id="userName"></span>
-    <button id="logoutBtn" class="btn-logout">Dang xuat</button>
+    <button id="logoutBtn" class="btn-logout">Đăng xuất</button>
   </div>
 </header>
 
@@ -453,24 +453,24 @@ input,button,select,textarea{font-family:inherit}
   <!-- ===== SEARCH VIEW ===== -->
   <div id="viewSearch">
     <div class="hero">
-      <h1>San ve xe Phuong Trang</h1>
-      <p>Tu dong tim va dat ve khi co cho trong</p>
+      <h1>Săn vé xe Phương Trang</h1>
+      <p>Tự động tìm và đặt vé khi có chỗ trống</p>
     </div>
 
     <form id="createForm">
       <!-- Route -->
       <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Lo trinh</div>
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Lộ trình</div>
         <div class="route-inputs">
           <div class="fi">
-            <label>Diem xuat phat <span class="req">*</span></label>
-            <input type="text" id="fOrigin" placeholder="VD: TP Ho Chi Minh" autocomplete="off" required>
+            <label>Điểm xuất phát <span class="req">*</span></label>
+            <input type="text" id="fOrigin" placeholder="VD: TP Hồ Chí Minh" autocomplete="off" required>
             <div class="ac-dropdown" id="acOrigin"></div>
           </div>
-          <button type="button" class="swap-btn" id="swapBtn" title="Doi chieu"><svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></button>
+          <button type="button" class="swap-btn" id="swapBtn" title="Đổi chiều"><svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></button>
           <div class="fi">
-            <label>Diem den <span class="req">*</span></label>
-            <input type="text" id="fDest" placeholder="VD: Da Lat" autocomplete="off" required>
+            <label>Điểm đến <span class="req">*</span></label>
+            <input type="text" id="fDest" placeholder="VD: Đà Lạt" autocomplete="off" required>
             <div class="ac-dropdown" id="acDest"></div>
           </div>
         </div>
@@ -478,41 +478,41 @@ input,button,select,textarea{font-family:inherit}
 
       <!-- Time -->
       <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>Thoi gian</div>
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>Thời gian</div>
         <div class="time-row">
           <div class="fi">
-            <label>Ngay di <span class="req">*</span></label>
+            <label>Ngày đi <span class="req">*</span></label>
             <input type="date" id="fDate" required>
           </div>
           <div class="fi">
-            <label>Tu gio</label>
+            <label>Từ giờ</label>
             <input type="time" id="fTimeFrom" value="00:00">
           </div>
           <div class="fi">
-            <label>Den gio</label>
+            <label>Đến giờ</label>
             <input type="time" id="fTimeTo" value="23:59">
           </div>
         </div>
         <div class="time-presets">
-          <span class="preset-label">Khung gio mau:</span>
-          <button type="button" class="preset-btn" data-from="00:00" data-to="23:59">Ca ngay</button>
-          <button type="button" class="preset-btn" data-from="00:00" data-to="06:00">Sang som</button>
-          <button type="button" class="preset-btn" data-from="06:00" data-to="12:00">Buoi sang</button>
-          <button type="button" class="preset-btn" data-from="12:00" data-to="18:00">Buoi chieu</button>
-          <button type="button" class="preset-btn" data-from="18:00" data-to="23:59">Buoi toi</button>
+          <span class="preset-label">Khung giờ mẫu:</span>
+          <button type="button" class="preset-btn" data-from="00:00" data-to="23:59">Cả ngày</button>
+          <button type="button" class="preset-btn" data-from="00:00" data-to="06:00">Sáng sớm</button>
+          <button type="button" class="preset-btn" data-from="06:00" data-to="12:00">Buổi sáng</button>
+          <button type="button" class="preset-btn" data-from="12:00" data-to="18:00">Buổi chiều</button>
+          <button type="button" class="preset-btn" data-from="18:00" data-to="23:59">Buổi tối</button>
         </div>
       </div>
 
       <!-- Seat -->
       <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M4 18v3h3v-3h10v3h3v-3h1v-3H3v3h1zm15-8h-2V7h-2V2H9v5H7v3H5c-1.1 0-2 .9-2 2v2h18v-2c0-1.1-.9-2-2-2z"/></svg>Loai ghe & So luong</div>
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M4 18v3h3v-3h10v3h3v-3h1v-3H3v3h1zm15-8h-2V7h-2V2H9v5H7v3H5c-1.1 0-2 .9-2 2v2h18v-2c0-1.1-.9-2-2-2z"/></svg>Loại ghế & Số lượng</div>
         <div class="seat-types">
-          <button type="button" class="seat-type-btn active" data-type="any">Tat ca</button>
-          <button type="button" class="seat-type-btn" data-type="giuong_nam">Giuong nam</button>
-          <button type="button" class="seat-type-btn" data-type="ghe_ngoi">Ghe ngoi</button>
+          <button type="button" class="seat-type-btn active" data-type="any">Tất cả</button>
+          <button type="button" class="seat-type-btn" data-type="giuong_nam">Giường nằm</button>
+          <button type="button" class="seat-type-btn" data-type="ghe_ngoi">Ghế ngồi</button>
         </div>
         <div class="seat-count-row">
-          <label>So luong ghe:</label>
+          <label>Số lượng ghế:</label>
           <div class="seat-counter">
             <button type="button" id="seatMinus">-</button>
             <div class="val" id="seatVal">1</div>
@@ -521,75 +521,75 @@ input,button,select,textarea{font-family:inherit}
         </div>
         <div class="seat-pref-grid">
           <div class="fi">
-            <label>Tang</label>
+            <label>Tầng</label>
             <select id="fSeatFloor">
-              <option value="any">Ca hai tang</option>
-              <option value="up">Tang tren</option>
-              <option value="down">Tang duoi</option>
+              <option value="any">Cả hai tầng</option>
+              <option value="up">Tầng trên</option>
+              <option value="down">Tầng dưới</option>
             </select>
           </div>
           <div class="fi">
-            <label>Vi tri cua so</label>
+            <label>Vị trí cửa sổ</label>
             <select id="fSeatWindow">
-              <option value="any">Khong uu tien</option>
-              <option value="window">Cua so</option>
-              <option value="non_window">Khong cua so</option>
+              <option value="any">Không ưu tiên</option>
+              <option value="window">Cửa sổ</option>
+              <option value="non_window">Không cửa sổ</option>
             </select>
           </div>
           <div class="fi">
-            <label>Uu tien hang dau</label>
+            <label>Ưu tiên hàng đầu</label>
             <select id="fPriorityTopRows">
-              <option value="0">Khong uu tien</option>
-              <option value="1">1 hang dau</option>
-              <option value="2">2 hang dau</option>
-              <option value="3">3 hang dau</option>
+              <option value="0">Không ưu tiên</option>
+              <option value="1">1 hàng đầu</option>
+              <option value="2">2 hàng đầu</option>
+              <option value="3">3 hàng đầu</option>
             </select>
           </div>
           <div class="fi">
-            <label>Gia ve toi da (VND)</label>
-            <input type="number" id="fMaxPrice" placeholder="0 = khong gioi han" min="0" step="1000">
+            <label>Giá vé tối đa (VND)</label>
+            <input type="number" id="fMaxPrice" placeholder="0 = không giới hạn" min="0" step="1000">
           </div>
         </div>
       </div>
 
       <!-- Passenger -->
       <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Thong tin hanh khach</div>
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Thông tin hành khách</div>
         <div class="passenger-grid">
           <div class="fi">
             <label>Email <span class="req">*</span></label>
             <input type="email" id="fEmail" placeholder="email@example.com" required>
           </div>
           <div class="fi">
-            <label>Ho va ten <span class="req">*</span></label>
-            <input type="text" id="fName" placeholder="Nguyen Van A" required>
+            <label>Họ và tên <span class="req">*</span></label>
+            <input type="text" id="fName" placeholder="Nguyễn Văn A" required>
           </div>
           <div class="fi">
-            <label>So dien thoai <span class="req">*</span></label>
+            <label>Số điện thoại <span class="req">*</span></label>
             <input type="tel" id="fPhone" placeholder="0912 345 678" required>
           </div>
         </div>
-        <p style="font-size:12px;color:var(--text3);margin-top:8px">Link thanh toan se duoc gui qua email sau khi tim thay ve</p>
+        <p style="font-size:12px;color:var(--text3);margin-top:8px">Liên kết thanh toán sẽ được gửi qua email sau khi tìm thấy vé</p>
       </div>
 
       <!-- Options -->
       <div class="form-card">
-        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Tuy chon</div>
+        <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Tùy chọn</div>
         <div class="toggle-row">
-          <div><div class="label">Tu dong dat ve</div><div class="desc">He thong se tu dong dat ve khi tim thay</div></div>
+          <div><div class="label">Tự động đặt vé</div><div class="desc">Hệ thống sẽ tự động đặt vé khi tìm thấy</div></div>
           <button type="button" class="toggle on" id="autoBookToggle"></button>
         </div>
       </div>
 
       <button type="submit" class="btn-submit" id="submitBtn">
         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        Tim chuyen xe
+        Tìm chuyến xe
       </button>
     </form>
 
     <!-- Popular routes -->
     <div class="form-card" style="margin-top:20px">
-      <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Tuyen pho bien</div>
+      <div class="form-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Tuyến phổ biến</div>
       <div class="popular-routes">
         <div class="pop-route" data-oid="1" data-oname="TP. Ho Chi Minh" data-did="2" data-dname="Lam Dong"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>HCM → Da Lat</div>
         <div class="pop-route" data-oid="1" data-oname="TP. Ho Chi Minh" data-did="79" data-dname="Khanh Hoa"><svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/></svg>HCM → Nha Trang</div>
@@ -602,7 +602,7 @@ input,button,select,textarea{font-family:inherit}
 
     <!-- Recent -->
     <div class="recent-section" id="recentSection" style="display:none">
-      <h3>Yeu cau gan day</h3>
+      <h3>Yêu cầu gần đây</h3>
       <div id="recentList"></div>
     </div>
   </div>
@@ -610,27 +610,27 @@ input,button,select,textarea{font-family:inherit}
   <!-- ===== TICKETS VIEW ===== -->
   <div id="viewTickets" style="display:none">
     <div class="stats-bar" id="statsBar">
-      <div class="stat-card orange"><div class="stat-value" id="statActive">0</div><div class="stat-label">Dang xu ly</div></div>
-      <div class="stat-card green"><div class="stat-value" id="statSuccess">0</div><div class="stat-label">Thanh cong</div></div>
-      <div class="stat-card red"><div class="stat-value" id="statFailed">0</div><div class="stat-label">That bai</div></div>
-      <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Tong</div></div>
+      <div class="stat-card orange"><div class="stat-value" id="statActive">0</div><div class="stat-label">Đang xử lý</div></div>
+      <div class="stat-card green"><div class="stat-value" id="statSuccess">0</div><div class="stat-label">Thành công</div></div>
+      <div class="stat-card red"><div class="stat-value" id="statFailed">0</div><div class="stat-label">Thất bại</div></div>
+      <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Tổng</div></div>
     </div>
 
     <div class="list-toolbar">
       <div class="filter-tabs" id="filterTabs">
-        <button class="filter-tab active" data-filter="all">Tat ca</button>
-        <button class="filter-tab" data-filter="active">Dang xu ly</button>
-        <button class="filter-tab" data-filter="success">Thanh cong</button>
-        <button class="filter-tab" data-filter="failed">That bai</button>
+        <button class="filter-tab active" data-filter="all">Tất cả</button>
+        <button class="filter-tab" data-filter="active">Đang xử lý</button>
+        <button class="filter-tab" data-filter="success">Thành công</button>
+        <button class="filter-tab" data-filter="failed">Thất bại</button>
       </div>
       <div class="list-spacer"></div>
-      <button class="nav-tab" id="ticketCreateBtn" style="background:var(--orange);color:#fff;font-size:12px;padding:7px 14px">+ Tao yeu cau</button>
+      <button class="nav-tab" id="ticketCreateBtn" style="background:var(--orange);color:#fff;font-size:12px;padding:7px 14px">+ Tạo yêu cầu</button>
     </div>
 
     <div class="ticket-list" id="ticketList">
       <div class="empty-state">
         <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
-        <p>Chua co yeu cau nao</p>
+        <p>Chưa có yêu cầu nào</p>
       </div>
     </div>
   </div>
@@ -738,7 +738,7 @@ async function showLoginScreen(){
   try{
     const cfg=await fetch('/api/config').then(r=>r.json());
     if(!cfg.google_client_id){
-      $('#loginError').textContent='Google Sign-In is not available. Please contact the administrator.';
+      $('#loginError').textContent='Google Sign-In hiện không khả dụng. Vui lòng liên hệ quản trị viên.';
       $('#loginError').style.display='block';
       return;
     }
@@ -763,7 +763,7 @@ async function handleGoogleSignIn(response){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({id_token:response.credential})
     });
-    if(!resp.ok)throw new Error('Dang nhap that bai');
+    if(!resp.ok)throw new Error('Đăng nhập thất bại');
     const user=await resp.json();
     $('#loginOverlay').style.display='none';
     onAuthSuccess(user);
@@ -849,7 +849,7 @@ function highlightItem(items,idx){
 function renderAcDropdown(dropdownEl,areas,groups,setFn,inputEl){
   let html='';
   if(areas.length>0){
-    html+='<div class="ac-section"><div class="ac-section-title">Khu vuc</div>';
+    html+='<div class="ac-section"><div class="ac-section-title">Khu vực</div>';
     areas.forEach(a=>{
       html+=`<div class="ac-item" data-id="${esc(a.id)}" data-name="${esc(a.name)}">
         <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
@@ -859,7 +859,7 @@ function renderAcDropdown(dropdownEl,areas,groups,setFn,inputEl){
     html+='</div>';
   }
   if(groups.length>0){
-    html+='<div class="ac-section"><div class="ac-section-title">Diem don/tra</div>';
+    html+='<div class="ac-section"><div class="ac-section-title">Điểm đón/trả</div>';
     groups.forEach(g=>{
       g.group&&g.group.forEach(p=>{
         html+=`<div class="ac-item" data-id="${esc(p.provinceId||p.areaId)}" data-name="${esc(p.provinceName||g.provinceName)}">
@@ -873,7 +873,7 @@ function renderAcDropdown(dropdownEl,areas,groups,setFn,inputEl){
     });
     html+='</div>';
   }
-  if(!html)html='<div class="ac-empty">Khong tim thay ket qua</div>';
+  if(!html)html='<div class="ac-empty">Không tìm thấy kết quả</div>';
   dropdownEl.innerHTML=html;
   dropdownEl.classList.add('show');
 
@@ -943,8 +943,8 @@ $$('.pop-route').forEach(el=>el.addEventListener('click',()=>{
 // ===== SUBMIT =====
 $('#createForm').addEventListener('submit',async e=>{
   e.preventDefault();
-  if(!originAreaID||!originName){toast('Vui long chon diem xuat phat tu danh sach goi y','error');return;}
-  if(!destAreaID||!destName){toast('Vui long chon diem den tu danh sach goi y','error');return;}
+  if(!originAreaID||!originName){toast('Vui lòng chọn điểm xuất phát từ danh sách gợi ý','error');return;}
+  if(!destAreaID||!destName){toast('Vui lòng chọn điểm đến từ danh sách gợi ý','error');return;}
 
   const emailVal=$('#fEmail').value.trim();
   const name=$('#fName').value.trim();
@@ -958,12 +958,12 @@ $('#createForm').addEventListener('submit',async e=>{
   
   // Validate time range
   if(timeFrom>=timeTo){
-    toast('Thoi gian bat dau phai truoc thoi gian ket thuc','error');
+    toast('Thời gian bắt đầu phải trước thời gian kết thúc','error');
     return;
   }
 
   const btn=$('#submitBtn');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Dang tao...';
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Đang tạo...';
   const data={
     origin_area_id:originAreaID,
     origin_name:originName,
@@ -988,13 +988,13 @@ $('#createForm').addEventListener('submit',async e=>{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(data)
     });
-    if(!resp.ok){const e=await resp.json();throw new Error(e.error||'Loi')}
+    if(!resp.ok){const e=await resp.json();throw new Error(e.error||'Lỗi')}
     if(posthogReady)posthog.capture('schedule_created',{
       origin:originName,dest:destName,
       travel_date:data.travel_date,seat_type:seatType,seat_count:seatCount,
       auto_book:autoBook,
     });
-    toast('Tao yeu cau san ve thanh cong!');
+    toast('Tạo yêu cầu săn vé thành công!');
     // Reset route fields
     $('#fOrigin').value='';$('#fDest').value='';
     originAreaID='';originName='';destAreaID='';destName='';
@@ -1003,7 +1003,7 @@ $('#createForm').addEventListener('submit',async e=>{
   }catch(err){toast(err.message,'error')}
   finally{
     btn.disabled=false;
-    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Tim chuyen xe';
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Tìm chuyến xe';
   }
 });
 
@@ -1011,7 +1011,7 @@ $('#createForm').addEventListener('submit',async e=>{
 async function loadTickets(){
   const em=currentUser?currentUser.email:getCookie('futa_email');
   if(!em){
-    $('#ticketList').innerHTML='<div class="empty-state"><p>Chua co thong tin nguoi dung</p></div>';
+    $('#ticketList').innerHTML='<div class="empty-state"><p>Chưa có thông tin người dùng</p></div>';
     return;
   }
   try{
@@ -1050,15 +1050,15 @@ async function checkPaymentStatuses(items){
       if(!el)continue;
       if(data.payment_status==='expired'){
         paymentTerminalBySchedule[s.id]='expired';
-        el.innerHTML=`<span style="color:#D97706">⏰ Qua han thanh toan</span>`;
+        el.innerHTML=`<span style="color:#D97706">⏰ Quá hạn thanh toán</span>`;
       }else if(data.payment_status==='pending'){
-        el.innerHTML=`<span style="color:var(--yellow)">⏳ Cho thanh toan</span>`;
+        el.innerHTML=`<span style="color:var(--yellow)">⏳ Chờ thanh toán</span>`;
       }else if(data.payment_status==='not_applicable'){
         paymentTerminalBySchedule[s.id]='not_applicable';
         el.remove();
       }else if(data.payment_status==='paid'){
         paymentTerminalBySchedule[s.id]='paid';
-        el.innerHTML=`<span style="color:var(--green)">✅ Da thanh toan</span>`;
+        el.innerHTML=`<span style="color:var(--green)">✅ Đã thanh toán</span>`;
       }else{
         el.innerHTML=`<span style="color:var(--text3)">${esc(data.error||'')}</span>`;
       }
@@ -1071,7 +1071,7 @@ async function checkPaymentStatuses(items){
 function renderTickets(items){
   const c=$('#ticketList');
   if(!items||items.length===0){
-    c.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg><p>Khong tim thay yeu cau nao</p></div>';
+    c.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg><p>Không tìm thấy yêu cầu nào</p></div>';
     return;
   }
   c.innerHTML=items.map((s,i)=>{
@@ -1080,14 +1080,14 @@ function renderTickets(items){
     if((s.status==='success'||s.status==='paid'||s.status==='expired')&&s.booking_code){
       const isExpired=s.status==='expired';
       successHtml=`<div class="tc-success" style="${isExpired?'background:#FEF3C7;border-color:#FDE68A':''}">
-        <div class="tc-success-title" style="${isExpired?'color:#D97706':''}">${isExpired?'⏰ Qua han thanh toan':'✓ Dat ve thanh cong'}</div>
+        <div class="tc-success-title" style="${isExpired?'color:#D97706':''}">${isExpired?'⏰ Quá hạn thanh toán':'✓ Đặt vé thành công'}</div>
         <div class="tc-success-grid">
-          <div class="tc-success-item"><span class="tc-success-label">Ma ve</span><span class="tc-success-value">${esc(s.booking_code)}</span></div>
-          <div class="tc-success-item"><span class="tc-success-label">Gia ve</span><span class="tc-success-value">${formatPrice(s.ticket_price)}</span></div>
-          <div class="tc-success-item"><span class="tc-success-label">Ghe</span><span class="tc-success-value">${esc(s.seat_name)||'—'}</span></div>
-          <div class="tc-success-item"><span class="tc-success-label">Khoi hanh</span><span class="tc-success-value">${s.departure_time?formatDT(s.departure_time):'—'}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Mã vé</span><span class="tc-success-value">${esc(s.booking_code)}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Giá vé</span><span class="tc-success-value">${formatPrice(s.ticket_price)}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Ghế</span><span class="tc-success-value">${esc(s.seat_name)||'—'}</span></div>
+          <div class="tc-success-item"><span class="tc-success-label">Khởi hành</span><span class="tc-success-value">${s.departure_time?formatDT(s.departure_time):'—'}</span></div>
         </div>
-        ${!isExpired?`<div id="payment-${s.id}" style="margin-top:8px;font-size:12px;color:var(--text3)">Dang kiem tra thanh toan...</div>`:''}
+        ${!isExpired?`<div id="payment-${s.id}" style="margin-top:8px;font-size:12px;color:var(--text3)">Đang kiểm tra thanh toán...</div>`:''}
       </div>`;
     }
     let errorHtml='';
@@ -1105,16 +1105,16 @@ function renderTickets(items){
         <span class="badge ${s.status}">${st.label}</span>
       </div>
       <div class="tc-details">
-        <div class="tc-detail"><span class="tc-detail-label">Ngay di</span><span class="tc-detail-value">${formatDate(s.travel_date)}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Khung gio</span><span class="tc-detail-value">${timeSlotLabel(s.time_from,s.time_to)}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Loai ghe</span><span class="tc-detail-value">${seatTypeLabel(s.seat_type)}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">So ghe</span><span class="tc-detail-value">${s.seat_count}</span></div>
-        <div class="tc-detail"><span class="tc-detail-label">Lan thu</span><span class="tc-detail-value">${s.retry_count}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Ngày đi</span><span class="tc-detail-value">${formatDate(s.travel_date)}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Khung giờ</span><span class="tc-detail-value">${timeSlotLabel(s.time_from,s.time_to)}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Loại ghế</span><span class="tc-detail-value">${seatTypeLabel(s.seat_type)}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Số ghế</span><span class="tc-detail-value">${s.seat_count}</span></div>
+        <div class="tc-detail"><span class="tc-detail-label">Lần thử</span><span class="tc-detail-value">${s.retry_count}</span></div>
       </div>
       ${successHtml}${errorHtml}
       <div class="tc-actions">
-        ${isActive?`<button class="btn-sm danger" onclick="app.cancel('${s.id}')">Huy</button>`:''}
-        <button class="btn-sm danger" onclick="app.remove('${s.id}')">Xoa</button>
+        ${isActive?`<button class="btn-sm danger" onclick="app.cancel('${s.id}')">Hủy</button>`:''}
+        <button class="btn-sm danger" onclick="app.remove('${s.id}')">Xóa</button>
       </div>
     </div>`;
   }).join('');
@@ -1154,41 +1154,41 @@ async function loadRecent(){
 // ===== GLOBAL ACTIONS =====
 window.app={
   async cancel(id){
-    if(!confirm('Huy yeu cau nay?'))return;
+    if(!confirm('Hủy yêu cầu này?'))return;
     await fetch(`/api/schedules/${id}/cancel`,{method:'POST'});
     if(posthogReady)posthog.capture('schedule_cancelled',{schedule_id:id});
-    toast('Da huy yeu cau');loadTickets();
+    toast('Đã hủy yêu cầu');loadTickets();
   },
   async remove(id){
-    if(!confirm('Xoa yeu cau nay?'))return;
+    if(!confirm('Xóa yêu cầu này?'))return;
     await fetch(`/api/schedules/${id}`,{method:'DELETE'});
     if(posthogReady)posthog.capture('schedule_deleted',{schedule_id:id});
-    toast('Da xoa');loadTickets();
+    toast('Đã xóa');loadTickets();
   }
 };
 
 // ===== HELPERS =====
 function statusInfo(s){
   const map={
-    pending:{label:'Cho xu ly'},searching:{label:'Dang tim'},
-    found:{label:'Da tim thay'},booking:{label:'Dang dat'},
-    success:{label:'Thanh cong'},paid:{label:'Da thanh toan'},failed:{label:'That bai'},
-    cancelled:{label:'Da huy'},expired:{label:'Qua han TT'}
+    pending:{label:'Chờ xử lý'},searching:{label:'Đang tìm'},
+    found:{label:'Đã tìm thấy'},booking:{label:'Đang đặt'},
+    success:{label:'Thành công'},paid:{label:'Đã thanh toán'},failed:{label:'Thất bại'},
+    cancelled:{label:'Đã hủy'},expired:{label:'Quá hạn TT'}
   };
   return map[s]||map.pending;
 }
 function timeSlotLabel(from,to){
-  if(from==='00:00'&&(to==='23:59'||to==='24:00'))return'Ca ngay';
-  if(from==='00:00'&&to==='06:00')return'Sang som';
-  if(from==='06:00'&&to==='12:00')return'Buoi sang';
-  if(from==='12:00'&&to==='18:00')return'Buoi chieu';
-  if(from==='18:00'&&(to==='23:59'||to==='24:00'))return'Buoi toi';
+  if(from==='00:00'&&(to==='23:59'||to==='24:00'))return'Cả ngày';
+  if(from==='00:00'&&to==='06:00')return'Sáng sớm';
+  if(from==='06:00'&&to==='12:00')return'Buổi sáng';
+  if(from==='12:00'&&to==='18:00')return'Buổi chiều';
+  if(from==='18:00'&&(to==='23:59'||to==='24:00'))return'Buổi tối';
   return(from||'00:00')+' - '+(to||'23:59');
 }
 function seatTypeLabel(t){
-  if(t==='giuong_nam')return'Giuong nam';
-  if(t==='ghe_ngoi')return'Ghe ngoi';
-  return'Tat ca';
+  if(t==='giuong_nam')return'Giường nằm';
+  if(t==='ghe_ngoi')return'Ghế ngồi';
+  return'Tất cả';
 }
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function formatDate(d){
