@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -63,7 +64,11 @@ func (db *DB) RunMigrations(ctx context.Context, migrationsDir string) error {
 	if _, err := db.Pool.Exec(ctx, `SELECT pg_advisory_lock($1)`, migrationLockID); err != nil {
 		return fmt.Errorf("acquire migration lock: %w", err)
 	}
-	defer db.Pool.Exec(context.Background(), `SELECT pg_advisory_unlock($1)`, migrationLockID)
+	defer func() {
+		unlockCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_, _ = db.Pool.Exec(unlockCtx, `SELECT pg_advisory_unlock($1)`, migrationLockID)
+	}()
 
 	for _, file := range files {
 		version := filepath.Base(file)
@@ -91,12 +96,16 @@ func (db *DB) RunMigrations(ctx context.Context, migrationsDir string) error {
 		}
 
 		if _, err := tx.Exec(ctx, string(sqlBytes)); err != nil {
-			tx.Rollback(ctx)
+			if rbErr := tx.Rollback(ctx); rbErr != nil {
+				return fmt.Errorf("apply migration %s: %w (rollback error: %v)", version, err, rbErr)
+			}
 			return fmt.Errorf("apply migration %s: %w", version, err)
 		}
 
 		if _, err := tx.Exec(ctx, `INSERT INTO schema_migrations (version) VALUES ($1)`, version); err != nil {
-			tx.Rollback(ctx)
+			if rbErr := tx.Rollback(ctx); rbErr != nil {
+				return fmt.Errorf("record migration %s: %w (rollback error: %v)", version, err, rbErr)
+			}
 			return fmt.Errorf("record migration %s: %w", version, err)
 		}
 
