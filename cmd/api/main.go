@@ -39,6 +39,9 @@ func main() {
 		log.Fatalf("connect database: %v", err)
 	}
 	defer db.Close()
+	if err := db.RunMigrations(context.Background(), database.ResolveMigrationsDir(cfgPath)); err != nil {
+		log.Fatalf("run migrations: %v", err)
+	}
 
 	futaClient := futa.NewClient(cfg.Futa)
 
