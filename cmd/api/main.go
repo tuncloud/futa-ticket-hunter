@@ -39,6 +39,9 @@ func main() {
 		log.Fatalf("connect database: %v", err)
 	}
 	defer db.Close()
+	if err := db.RunMigrations(context.Background(), database.ResolveMigrationsDir(cfgPath)); err != nil {
+		log.Fatalf("run migrations: %v", err)
+	}
 
 	futaClient := futa.NewClient(cfg.Futa)
 
@@ -251,6 +254,10 @@ func main() {
 			}
 			if s.PriorityTopRows > 10 {
 				s.PriorityTopRows = 10
+			}
+
+			if s.MaxPrice < 0 {
+				s.MaxPrice = 0
 			}
 
 			if err := db.CreateSchedule(r.Context(), &s); err != nil {

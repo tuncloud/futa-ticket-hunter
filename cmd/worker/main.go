@@ -34,6 +34,9 @@ func main() {
 		log.Fatalf("connect database: %v", err)
 	}
 	defer db.Close()
+	if err := db.RunMigrations(context.Background(), database.ResolveMigrationsDir(cfgPath)); err != nil {
+		log.Fatalf("run migrations: %v", err)
+	}
 
 	futaClient := futa.NewClient(cfg.Futa)
 
@@ -170,6 +173,11 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 			if s.SeatType == "ghe_ngoi" && trip.SeatTypeCode == "glm" {
 				continue
 			}
+		}
+
+		// Filter by max price
+		if s.MaxPrice > 0 && trip.Price > s.MaxPrice {
+			continue
 		}
 
 		// If not auto_book, just mark as found

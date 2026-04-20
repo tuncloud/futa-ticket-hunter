@@ -1,0 +1,2 @@
+ALTER TABLE booking_schedules
+ADD COLUMN IF NOT EXISTS max_price INT NOT NULL DEFAULT 0;
