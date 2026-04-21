@@ -34,11 +34,30 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 
+	db, err := database.New(cfg.Database)
+	if err != nil {
+		log.Fatalf("connect database: %v", err)
+	}
+	defer db.Close()
+
 	futaClient := futa.NewClient(cfg.Futa)
 
 	if cfg.Google.ClientID == "" {
 		log.Println("WARNING: google.client_id is not configured — Google Sign-In will not work")
 	}
+
+	sessions := newDBSessionStore(db)
+
+	// Periodically clean up expired sessions from the database.
+	go func() {
+		ticker := time.NewTicker(time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := db.DeleteExpiredSessions(context.Background()); err != nil {
+				log.Printf("clean expired sessions: %v", err)
+			}
+		}
+	}()
 
 	mux := http.NewServeMux()
 
