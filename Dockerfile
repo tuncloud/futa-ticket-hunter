@@ -23,6 +23,7 @@ FROM alpine:3.20 AS runtime
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY config.yaml /app/config.yaml
+COPY migrations /app/migrations
 
 FROM runtime AS api
 COPY --from=builder /out/api /app/api
