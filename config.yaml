@@ -9,7 +9,7 @@ database:
   dbname: defaultdb
 
 worker:
-  poll_interval: 5s
+  poll_interval: 2s
   max_retries: 3
   concurrency: 5
   retry_delay: 1s
