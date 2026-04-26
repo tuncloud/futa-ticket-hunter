@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/viper"
 )
 
@@ -19,53 +20,54 @@ type Config struct {
 }
 
 type PosthogConfig struct {
-	APIKey string `yaml:"api_key"`
-	Host   string `yaml:"host"`
+	APIKey string `yaml:"api_key" envconfig:"POSTHOG_API_KEY"`
+	Host   string `yaml:"host" envconfig:"POSTHOG_HOST"`
 }
 
 type GoogleConfig struct {
-	ClientID string `yaml:"client_id"`
+	ClientID string `yaml:"client_id" envconfig:"GOOGLE_CLIENT_ID"`
 }
 
 type ServerConfig struct {
-	Port int `yaml:"port"`
+	Port int `yaml:"port" envconfig:"SERVER_PORT"`
 }
 
 type DatabaseConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	DBName   string `yaml:"dbname"`
-	SSLMode  string `yaml:"sslmode"`
+	Host     string `yaml:"host" envconfig:"DATABASE_HOST"`
+	Port     int    `yaml:"port" envconfig:"DATABASE_PORT"`
+	User     string `yaml:"user" envconfig:"DATABASE_USER"`
+	Password string `yaml:"password" envconfig:"DATABASE_PASSWORD"`
+	DBName   string `yaml:"dbname" envconfig:"DATABASE_DBNAME"`
+	SSLMode  string `yaml:"sslmode" envconfig:"DATABASE_SSLMODE"`
 }
 
 type WorkerConfig struct {
-	PollInterval time.Duration `yaml:"poll_interval"`
-	MaxRetries   int           `yaml:"max_retries"`
-	Concurrency  int           `yaml:"concurrency"`
-	RetryDelay   time.Duration `yaml:"retry_delay"`
+	PollInterval time.Duration `yaml:"poll_interval" envconfig:"WORKER_POLL_INTERVAL"`
+	MaxRetries   int           `yaml:"max_retries" envconfig:"WORKER_MAX_RETRIES"`
+	Concurrency  int           `yaml:"concurrency" envconfig:"WORKER_CONCURRENCY"`
+	RetryDelay   time.Duration `yaml:"retry_delay" envconfig:"WORKER_RETRY_DELAY"`
 }
 
 type WebhookConfig struct {
-	URL    string `yaml:"url"`
-	Secret string `yaml:"secret"`
+	URL    string `yaml:"url" envconfig:"WEBHOOK_URL"`
+	Secret string `yaml:"secret" envconfig:"WEBHOOK_SECRET"`
 }
 
 type EmailConfig struct {
-	ResendAPIKey string `yaml:"resend_api_key"`
-	FromAddress  string `yaml:"from_address"`
-	FromName     string `yaml:"from_name"`
+	ResendAPIKey string `yaml:"resend_api_key" envconfig:"EMAIL_RESEND_API_KEY"`
+	FromAddress  string `yaml:"from_address" envconfig:"EMAIL_FROM_ADDRESS"`
+	FromName     string `yaml:"from_name" envconfig:"EMAIL_FROM_NAME"`
 }
 
 type FutaConfig struct {
-	BaseURL    string `yaml:"base_url"`
-	WebURL     string `yaml:"web_url"`
-	UserAgent  string `yaml:"user_agent"`
-	AppVersion string `yaml:"app_version"`
-	Channel    string `yaml:"channel"`
+	BaseURL    string `yaml:"base_url" envconfig:"FUTA_BASE_URL"`
+	WebURL     string `yaml:"web_url" envconfig:"FUTA_WEB_URL"`
+	UserAgent  string `yaml:"user_agent" envconfig:"FUTA_USER_AGENT"`
+	AppVersion string `yaml:"app_version" envconfig:"FUTA_APP_VERSION"`
+	Channel    string `yaml:"channel" envconfig:"FUTA_CHANNEL"`
 }
 
+// Load loads config from file and overrides with environment variables using envconfig
 func Load(path string) (*Config, error) {
 	v := viper.New()
 	v.SetConfigFile(path)
@@ -81,6 +83,12 @@ func Load(path string) (*Config, error) {
 	// Unmarshal vào struct
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+
+	// Override bằng envconfig
+	// Cần import "github.com/kelseyhightower/envconfig"
+	if err := envconfig.Process("", &cfg); err != nil {
 		return nil, err
 	}
 
