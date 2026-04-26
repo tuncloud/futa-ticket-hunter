@@ -2,11 +2,11 @@ server:
   port: 8080
 
 database:
-  host: tuando-17197.j77.aws-ap-southeast-1.cockroachlabs.cloud
-  port: 26257
-  user: futa
-  password: XgOE12FrBx4mRUZdY8MABw
-  dbname: defaultdb
+  host: ""
+  port: ""
+  user: ""
+  password: ""
+  dbname: ""
 
 worker:
   poll_interval: 2s
@@ -15,11 +15,11 @@ worker:
   retry_delay: 1s
 
 webhook:
-  url: "https://workflow.tuando.app/webhook/e0d886bd-59d1-4a95-b596-71fc67b265bd"
+  url: ""
   secret: ""
 
 email:
-  resend_api_key: "re_AtkLQSGW_FUksReiiuh1cyExfZaaZNR3g"
+  resend_api_key: ""
   from_address: "noreply@tuando.app"
   from_name: "FutaHunter"
 
