@@ -28,6 +28,10 @@
   --font:'Lexend',system-ui,-apple-system,sans-serif;
 }
 html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+@supports(padding: max(0px)){
+  body{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .top-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
 input,button,select,textarea{font-family:inherit}
 
@@ -343,6 +347,20 @@ input,button,select,textarea{font-family:inherit}
 @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
 
+/* ===== VIEW TRANSITIONS ===== */
+.view-transition{animation:viewIn .25s ease}
+@keyframes viewIn{
+  from{opacity:0;transform:translateX(20px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+/* ===== SAFARI IOS FIXES ===== */
+/* Prevent rubber banding on iOS */
+html,body{
+  overscroll-behavior:none;
+  -webkit-overflow-scrolling:touch;
+}
+
 /* ===== RECENT SECTION ===== */
 .recent-section{margin-top:24px}
 .recent-section h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px}
@@ -362,42 +380,121 @@ input,button,select,textarea{font-family:inherit}
 .recent-route{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .recent-date{font-size:11px;color:var(--text3)}
 
-/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE: Mobile First ===== */
+/* Large tablets */
+@media(max-width:1024px){
+  .container{padding:20px 16px}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .hero{padding:28px 20px}
+  .form-card{padding:20px}
+  .popular-routes{grid-template-columns:repeat(3,1fr)}
+}
+/* Tablets and below */
 @media(max-width:768px){
   .container{padding:16px 12px}
-  .route-inputs{flex-direction:column}
-  .swap-btn{transform:rotate(90deg);margin-top:0;align-self:center}
+  .route-inputs{flex-direction:column;gap:8px}
+  .swap-btn{transform:rotate(90deg);margin-top:0;align-self:center;width:32px;height:32px}
   .time-row{grid-template-columns:1fr 1fr}
   .passenger-grid{grid-template-columns:1fr}
-  .popular-routes{grid-template-columns:1fr 1fr}
-  .stats-bar{grid-template-columns:1fr 1fr}
+  .popular-routes{grid-template-columns:repeat(2,1fr)}
   .hero{padding:24px 16px}
   .seat-pref-grid{grid-template-columns:1fr 1fr}
-  /* --- mobile header: two-row layout --- */
-  .top-header{flex-wrap:wrap;height:auto;padding:10px 16px 0;align-content:flex-start}
-  .logo{height:42px}
-  .nav-spacer{flex:1;height:42px}
-  #userDisplay{height:42px;gap:8px}
-  .nav-tabs{
-    order:10;width:calc(100% + 32px);margin:8px -16px 0;
-    padding:4px 8px 8px;border-top:1px solid var(--border-light);gap:4px;
-  }
-  .nav-tabs .nav-tab{flex:1;text-align:center;padding:9px 8px}
-}
-@media(max-width:480px){
-  .time-row{grid-template-columns:1fr}
-  .time-presets{margin-top:8px}
-  .preset-label{width:100%;margin-bottom:4px}
-  .popular-routes{grid-template-columns:1fr}
-  .stats-bar{grid-template-columns:1fr 1fr}
-  .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .seat-pref-grid{grid-template-columns:1fr}
-  /* hide user name on very small screens — avatar + button is enough */
+  .form-card{padding:16px;border-radius:var(--radius-sm)}
+  .form-card-title{font-size:13px;margin-bottom:12px}
+  /* --- mobile header: compact mode --- */
+  .top-header{height:52px;padding:0 12px}
+  .logo-text{display:none}
+  .nav-tabs{display:none}
+  .nav-spacer{display:none}
+  .phone-display{display:none}
+  #userDisplay{gap:6px}
+  #userAvatar{width:28px;height:28px}
   #userName{display:none}
-  .btn-logout{padding:5px 8px;font-size:11px}
+  .btn-logout{padding:6px 10px;font-size:11px}
+  .login-card{padding:32px 24px}
+  /* tickets view */
+  .stats-bar{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+  .stat-card{padding:12px}
+  .stat-value{font-size:18px}
+  .list-toolbar{padding-bottom:8px}
+  .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px}
+  .filter-tab{padding:6px 12px;font-size:12px}
+  /* form adjustments */
+  .fi input,.fi select{padding:12px 10px;font-size:15px;-webkit-appearance:none}
+  .fi label{font-size:11px}
+  .seat-types{gap:6px}
+  .seat-type-btn{padding:8px 14px;font-size:12px}
+  .time-presets{gap:4px}
+  .preset-btn{padding:5px 8px;font-size:11px}
+  .btn-submit{padding:14px;font-size:14px;border-radius:var(--radius-xs)}
+  /* popular routes smaller */
+  .pop-route{padding:8px 10px;font-size:11px}
+  .pop-route svg{width:12px;height:12px}
+  /* recent section */
+  .recent-item{padding:8px 12px}
+  .recent-route-icon{width:28px;height:28px}
+  .recent-route-icon svg{width:14px;height:14px}
+  .recent-route{font-size:12px}
+  /* ticket card */
+  .ticket-card{padding:14px 16px;gap:12px}
+  .tc-route-icon{width:36px;height:36px}
+  .tc-route-icon svg{width:18px;height:18px}
+  .tc-route-name{font-size:14px}
+  .tc-details{gap:12px;padding:10px 12px}
+  .tc-detail-value{font-size:12px}
+  .tc-success{padding:10px 12px}
+  .tc-success-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .tc-actions{gap:6px}
+  .btn-sm{padding:6px 12px;font-size:11px}
+}
+/* Large phones */
+@media(max-width:540px){
+  .stats-bar{grid-template-columns:1fr 1fr;gap:6px}
+  .stat-card{padding:10px 8px}
+  .stat-value{font-size:16px}
+  .stat-label{font-size:10px}
+  .container{padding:12px 10px}
+  .hero{padding:20px 14px;margin-bottom:16px}
+  .hero h1{font-size:18px}
+  .hero p{font-size:12px}
+  .form-card{margin-bottom:12px;padding:14px}
+  .popular-routes{grid-template-columns:1fr;gap:6px}
+  .time-presets{margin-top:8px;flex-wrap:wrap}
+  .preset-label{width:100%;margin-bottom:2px;display:block}
+  .time-row{grid-template-columns:1fr}
+  .seat-pref-grid{grid-template-columns:1fr;gap:10px}
+  .passenger-grid .fi:last-child{margin-top:0}
+  /* stat cards in row for very small */
+  .stat-card.orange .stat-value,.stat-card.green .stat-value,.stat-card.red .stat-value{font-size:18px}
+  /* login */
+  .login-card{padding:28px 20px;border-radius:var(--radius-sm)}
+  .login-title{font-size:18px}
+  .login-desc{font-size:12px}
 }
 
-/* ===== LOGIN OVERLAY ===== */
+/* ===== MOBILE NAVIGATION: Bottom Tab Bar ===== */
+@media(max-width:768px){
+  .mobile-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;
+    background:var(--white);border-top:1px solid var(--border-light);
+    z-index:100;padding:6px 12px 8px;padding-bottom:max(8px,env(safe-area-inset-bottom));
+    box-shadow:0 -2px 10px rgba(0,0,0,0.05);
+  }
+  .mobile-nav-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:8px 4px;border:none;background:transparent;
+    cursor:pointer;transition:all .15s;border-radius:var(--radius-xs);
+  }
+  .mobile-nav-btn svg{width:22px;height:22px;fill:var(--text3)}
+  .mobile-nav-btn span{font-size:10px;font-weight:600;color:var(--text3)}
+  .mobile-nav-btn.active{background:var(--orange-light)}
+  .mobile-nav-btn.active svg{fill:var(--orange)}
+  .mobile-nav-btn.active span{color:var(--orange)}
+  .container{padding-bottom:80px}
+  body{padding-bottom:0}
+}
+
+/* Login overlay */
 .login-overlay{
   position:fixed;inset:0;background:var(--bg);z-index:200;
   display:flex;align-items:center;justify-content:center;padding:20px;
@@ -412,7 +509,69 @@ input,button,select,textarea{font-family:inherit}
 .login-desc{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
 .login-actions{display:flex;justify-content:center;min-height:44px}
 .login-error{font-size:12px;color:var(--red);margin-top:16px}
-</style>
+
+/* ===== MOBILE: Hide desktop elements, show mobile nav ===== */
+@media(min-width:769px){
+  .mobile-nav{display:none !important}
+  .mobile-nav-btn{display:none}
+}
+@media(max-width:768px){
+  .top-header .nav-tabs{display:none}
+  .top-header .nav-spacer{display:none}
+}
+
+/* ===== TOUCH OPTIMIZATIONS ===== */
+@media(max-width:768px){
+  /* Larger touch targets */
+  .fi input,.fi select,toggle,.btn-submit,.btn-sm,.preset-btn,.seat-type-btn,.pop-route,.nav-tab{
+    min-height:44px
+  }
+  /* Better scrolling */
+  .container{
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  /* Autocomplete better for touch */
+  .ac-dropdown{
+    max-height:50vh;
+    position:fixed;top:auto;bottom:50px;
+    left:10px;right:10px;width:auto;
+    border-radius:var(--radius) var(--radius) var(--radius-sm) var(--radius-sm);
+  }
+  /* Disable hover delays */
+  .ac-item,.seat-type-btn,.preset-btn,.pop-route{
+    transition:background .05s;
+  }
+  /* Prevent zoom on input focus */
+  input,select,textarea{
+    font-size:16px !important;
+  }
+  /* Pull hint */
+  .pull-hint{
+    display:block;text-align:center;padding:8px;color:var(--text3);font-size:11px;
+  }
+}
+
+/* ===== IMPROVED FORM MOBILE ===== */
+@media(max-width:768px){
+  .route-inputs{margin:0 -4px}
+  .fi{margin:0 4px}
+  .form-card{margin-left:-4px;margin-right:-4px;width:calc(100% + 8px);max-width:none;border-radius:0;border-left:none;border-right:none}
+  .container .form-card{border-radius:var(--radius-sm);margin-left:0;margin-right:0;width:100%;max-width:none;border-left:1px solid var(--border-light);border-right:1px solid var(--border-light)}
+  .seat-types{margin:-4px}
+  .seat-type-btn{margin:4px;border-radius:var(--radius-xs) !important}
+  .seat-counter button{width:44px;height:44px}
+  .seat-counter .val{width:44px;font-size:18px}
+  .toggle{width:52px;height:28px}
+  .toggle::after{width:24px;height:24px}
+  .toggle.on::after{left:26px}
+}
+
+/* ===== ICON SIZES ===== */
+@media(max-width:768px){
+  .tc-route-icon{width:40px;height:40px}
+  .tc-route-icon svg{width:20px;height:20px}
+}
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -448,6 +607,18 @@ input,button,select,textarea{font-family:inherit}
     <button id="logoutBtn" class="btn-logout">Đăng xuất</button>
   </div>
 </header>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-btn active" data-view="search">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <span>Tìm vé</span>
+  </button>
+  <button class="mobile-nav-btn" data-view="tickets">
+    <svg viewBox="0 0 24 24"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+    <span>Vé của tôi</span>
+  </button>
+</nav>
 
 <div class="container">
   <!-- ===== SEARCH VIEW ===== -->
@@ -709,14 +880,17 @@ $('#fPhone').addEventListener('change',function(){
 function goToView(view){
   currentView=view;
   $$('.nav-tab[data-view]').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+  $$('.mobile-nav-btn[data-view]').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
   $('#viewSearch').style.display=view==='search'?'block':'none';
   $('#viewTickets').style.display=view==='tickets'?'block':'none';
   if(posthogReady)posthog.capture('view_changed',{view});
   if(view==='tickets')loadTickets();
   if(view==='search')loadRecent();
+  window.scrollTo(0,0);
 }
 
 $$('.nav-tab[data-view]').forEach(t=>t.addEventListener('click',()=>goToView(t.dataset.view)));
+$$('.mobile-nav-btn[data-view]').forEach(t=>t.addEventListener('click',()=>goToView(t.dataset.view)));
 $('#logoBtn').addEventListener('click',()=>goToView('search'));
 $('#ticketCreateBtn').addEventListener('click',()=>goToView('search'));
 
