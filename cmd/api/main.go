@@ -34,6 +34,9 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 
+	b, _ := json.MarshalIndent(cfg, "", "  ")
+	fmt.Println(string(b))
+
 	db, err := database.New(cfg.Database)
 	if err != nil {
 		log.Fatalf("connect database: %v", err)

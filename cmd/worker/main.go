@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -28,6 +29,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config: %v", err)
 	}
+
+	b, _ := json.MarshalIndent(cfg, "", "  ")
+	fmt.Println(string(b))
 
 	db, err := database.New(cfg.Database)
 	if err != nil {
@@ -111,6 +115,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 	fromDate := s.TravelDate + "T00:00:00.000+07:00"
 	routes, err := client.SearchRoutes(ctx, originAreaID, destAreaID, fromDate)
 	if err != nil {
+		log.Printf("[%s] Error searching routes: %v", s.ID[:8], err)
 		db.UpdateScheduleStatus(ctx, s.ID, "searching", fmt.Sprintf("search routes: %v", err))
 		return
 	}
@@ -128,6 +133,7 @@ func processOne(ctx context.Context, db *database.DB, client *futa.Client, wh *w
 	toDate := s.TravelDate + "T23:59:59.000+07:00"
 	trips, err := client.SearchTripsByRoute(ctx, routeIDs, fromDate, toDate)
 	if err != nil {
+		log.Printf("[%s] Error searching trips: %v", s.ID[:8], err)
 		db.UpdateScheduleStatus(ctx, s.ID, "searching", fmt.Sprintf("search trips: %v", err))
 		return
 	}
