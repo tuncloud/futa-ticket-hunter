@@ -1,10 +1,10 @@
 package config
 
 import (
-	"os"
+	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -67,28 +67,22 @@ type FutaConfig struct {
 }
 
 func Load(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
+	v := viper.New()
+	v.SetConfigFile(path)
+	v.SetConfigType("yaml")
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// Đọc file config
+	if err := v.ReadInConfig(); err != nil {
 		return nil, err
 	}
+
+	// Unmarshal vào struct
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
-	if cfg.Server.Port == 0 {
-		cfg.Server.Port = 8080
-	}
-	if cfg.Worker.PollInterval == 0 {
-		cfg.Worker.PollInterval = 30 * time.Second
-	}
-	if cfg.Worker.MaxRetries == 0 {
-		cfg.Worker.MaxRetries = 3
-	}
-	if cfg.Worker.Concurrency <= 0 {
-		cfg.Worker.Concurrency = 5
-	}
-	if cfg.Worker.RetryDelay == 0 {
-		cfg.Worker.RetryDelay = 30 * time.Second
-	}
+
 	return &cfg, nil
 }
