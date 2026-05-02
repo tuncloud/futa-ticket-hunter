@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS booking_schedules (
     booking_code VARCHAR(20) DEFAULT '',
     ticket_price INT DEFAULT 0,
     seat_name VARCHAR(50) DEFAULT '',
+    route_name VARCHAR(500) DEFAULT '',
     departure_time TIMESTAMPTZ,
 
     -- Metadata
