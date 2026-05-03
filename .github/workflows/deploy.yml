@@ -17,139 +17,14 @@ on:
   repository_dispatch:
     types: [deploy-production]
 
-env:
-  API_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/futa-ticket-hunter-api
-  WORKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/futa-ticket-hunter-worker
-  K8S_NAMESPACE: futa
-  K8S_DEPLOYMENT: futa-ticket-hunter
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Set Environment Variables
-        id: vars
-        run: |
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "tag=${{ github.event.client_payload.tag || 'latest' }}" >> $GITHUB_OUTPUT
-            echo "action=${{ github.event.client_payload.action || 'deploy' }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-            echo "action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Install cloudflared
-        run: |
-          curl -sSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
-          chmod +x cloudflared
-          sudo mv cloudflared /usr/local/bin/
-
-      - name: Start Cloudflare Tunnel proxy
-        env:
-          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-          K8S_API_URL: ${{ secrets.K8S_API_URL }}
-        run: |
-          echo "🔐 Starting Cloudflare Tunnel proxy..."
-          cloudflared access tcp --hostname "$K8S_API_URL" --url localhost:6443 &
-          sleep 3
-          echo "✅ Tunnel proxy started"
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-
-      - name: Execute Kubernetes Action
-        run: |
-          ACTION=${{ steps.vars.outputs.action }}
-          TAG=${{ steps.vars.outputs.tag }}
-          
-          if [ "$ACTION" = "restart" ]; then
-            echo "🔄 Restarting deployment ${{ env.K8S_DEPLOYMENT }}..."
-            kubectl rollout restart deployment/${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }}
-          else
-            echo "🚀 Deploying version $TAG..."
-            kubectl set image deployment/${{ env.K8S_DEPLOYMENT }} \
-              api=${{ env.API_IMAGE }}:$TAG \
-              worker=${{ env.WORKER_IMAGE }}:$TAG \
-              -n ${{ env.K8S_NAMESPACE }}
-            
-            kubectl annotate deployment/${{ env.K8S_DEPLOYMENT }} \
-              -n ${{ env.K8S_NAMESPACE }} \
-              kubernetes.io/change-cause="Deployed v$TAG via GitHub Actions run #${{ github.run_number }}" \
-              --overwrite
-          fi
-
-      - name: Rollout status
-        run: |
-          kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT }} \
-            -n ${{ env.K8S_NAMESPACE }} \
-            --timeout=300s
-
-      - name: Verify deployment
-        run: |
-          echo "=== Deployment Status ==="
-          kubectl get deployment ${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }}
-          echo ""
-          echo "=== Pods ==="
-          kubectl get pods -n ${{ env.K8S_NAMESPACE }} -l app=${{ env.K8S_DEPLOYMENT }}
-          echo ""
-          echo "=== Rollout History ==="
-          kubectl rollout history deployment/${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }} | tail -5
-
-      - name: Deployment summary
-        if: success()
-        run: |
-          ACTION=${{ steps.vars.outputs.action }}
-          TAG=${{ steps.vars.outputs.tag }}
-          echo "✅ ${ACTION^} successful!"
-          echo ""
-          if [ "$ACTION" = "deploy" ]; then
-            echo "📦 Version: $TAG"
-          fi
-          echo "📁 Namespace: ${{ env.K8S_NAMESPACE }}"
-          echo "🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-      - name: Send Telegram Notification (Success)
-        if: success()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
-          message: |
-            ✅ *${{ steps.vars.outputs.action == 'restart' && 'Restart' || 'Deployment' }} Successful!*
-            
-            *Repository:* ${{ github.repository }}
-            ${{ steps.vars.outputs.action == 'deploy' && format('*Tag:* `{0}`', steps.vars.outputs.tag) || '' }}
-            *Status:* Completed successfully 🚀
-
-      - name: Rollback on failure
-        if: failure() && steps.vars.outputs.action == 'deploy'
-        run: |
-          echo "❌ Deployment failed, initiating rollback..."
-          kubectl rollout undo deployment/${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }}
-          kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }} --timeout=300s
-
-      - name: Send Telegram Notification (Failure)
-        if: failure()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
-          message: |
-            ❌ *${{ steps.vars.outputs.action == 'restart' && 'Restart' || 'Deployment' }} Failed!*
-            
-            *Repository:* ${{ github.repository }}
-            ${{ steps.vars.outputs.action == 'deploy' && format('*Tag:* `{0}`\n*Action:* Rollback initiated.', steps.vars.outputs.tag) || '*Action:* Please check the logs.' }}
+    uses: tuncloud/workflow/.github/workflows/cd-deploy.yml@main
+    with:
+      namespace: futa
+      deployment-name: futa-ticket-hunter
+      targets: api,worker
+      image-tag: ${{ github.event.inputs.tag || github.event.client_payload.tag || 'latest' }}
+      deployment-type: ${{ github.event.inputs.action || github.event.client_payload.action || 'deploy' }}
+      notify: true
+    secrets: inherit

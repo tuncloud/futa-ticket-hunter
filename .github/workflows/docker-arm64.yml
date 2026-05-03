@@ -15,84 +15,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-
-env:
-  API_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/futa-ticket-hunter-api
-  WORKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/futa-ticket-hunter-worker
+  contents: write   # required for the CI workflow to create semver git tags
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-24.04-arm
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build API image (native arm64)
-        run: |
-          docker build \
-            --target api \
-            -t ${{ env.API_IMAGE }}:latest \
-            -t ${{ env.API_IMAGE }}:${{ github.sha }} \
-            .
-
-      - name: Push API image
-        run: |
-          docker push ${{ env.API_IMAGE }}:latest
-          docker push ${{ env.API_IMAGE }}:${{ github.sha }}
-
-      - name: Build Worker image (native arm64)
-        run: |
-          docker build \
-            --target worker \
-            -t ${{ env.WORKER_IMAGE }}:latest \
-            -t ${{ env.WORKER_IMAGE }}:${{ github.sha }} \
-            .
-
-      - name: Push Worker image
-        run: |
-          docker push ${{ env.WORKER_IMAGE }}:latest
-          docker push ${{ env.WORKER_IMAGE }}:${{ github.sha }}
-
-  notify-telegram:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Telegram Notification
-        env:
-          MESSAGE_TEXT: |
-            ✅ *Images Pushed Successfully!*
-
-            *Repository:* ${{ github.repository }}
-            *Tag*: `${{ github.sha }}`
-            *Actor:* ${{ github.actor }}
-            *Commit message:* ${{ github.event.head_commit.message }}
-
-            Click the button below to trigger the deployment.
-        run: |
-          jq -n \
-            --arg chat_id "${{ secrets.TELEGRAM_CHAT_ID }}" \
-            --arg url "https://github.com/${{ github.repository }}/actions/workflows/deploy.yml" \
-            '{
-              chat_id: $chat_id,
-              text: env.MESSAGE_TEXT,
-              parse_mode: "Markdown",
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    { text: "🚀 Deploy to Production", url: $url }
-                  ]
-                ]
-              }
-            }' > payload.json
-
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -H "Content-Type: application/json" \
-            -d @payload.json
+    uses: tuncloud/workflow/.github/workflows/ci-build-push.yml@main
+    with:
+      deployment-name: futa-ticket-hunter
+      targets: api,worker
+      notify: true
+      notify-button-text: "\U0001F680 Deploy to Production"
+      notify-button-url: "https://github.com/${{ github.repository }}/actions/workflows/deploy.yml"
+    secrets: inherit
