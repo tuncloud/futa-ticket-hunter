@@ -4,15 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - Dockerfile
-      - .github/workflows/docker-arm64.yml
-      - cmd/**
-      - internal/**
-      - go.mod
-      - go.sum
-      - config.yaml
-  workflow_dispatch:
 
 permissions:
   contents: write   # required for the CI workflow to create semver git tags
