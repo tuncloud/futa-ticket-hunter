@@ -426,7 +426,7 @@ input,button,select,textarea{font-family:inherit}
     <h2 class="login-title">Chào mừng đến với FutaHunter</h2>
     <p class="login-desc">Đăng nhập để bắt đầu săn vé xe Phương Trang tự động</p>
     <div class="login-actions" id="clerkSignIn"></div>
-    <p id="loginError" class="login-error" style="display:none">Không thể tải Clerk. Vui lòng thử lại sau.</p>
+    <p id="loginError" class="login-error" style="display:none">Không thể tải hệ thống đăng nhập. Vui lòng thử lại sau.</p>
   </div>
 </div>
 
@@ -823,7 +823,7 @@ async function showLoginScreen(){
       clerkMounted=true;
     }
   }catch(e){
-    $('#loginError').textContent='Clerk hiện không khả dụng. Vui lòng liên hệ quản trị viên.';
+    $('#loginError').textContent='Hệ thống đăng nhập hiện không khả dụng. Vui lòng liên hệ quản trị viên.';
     $('#loginError').style.display='block';
   }
 }

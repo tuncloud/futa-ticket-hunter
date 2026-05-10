@@ -51,7 +51,7 @@ func main() {
 	}
 	clerkVerifier, err := auth.NewClerkVerifier(cfg.Clerk.Issuer, cfg.Clerk.JWKSURL)
 	if err != nil {
-		log.Printf("WARNING: clerk auth is not configured: %v (server will start in degraded auth mode)", err)
+		log.Printf("WARNING: Clerk auth is not configured: %v (server will start in degraded auth mode)", err)
 	}
 
 	mux := http.NewServeMux()

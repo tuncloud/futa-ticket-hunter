@@ -24,7 +24,7 @@ func NewClerkVerifier(issuer, jwksURL string) (*ClerkVerifier, error) {
 		jwksURL = issuer + "/.well-known/jwks.json"
 	}
 	if jwksURL == "" {
-		return nil, errors.New("missing clerk issuer or jwks url")
+		return nil, errors.New("missing Clerk issuer or JWKS URL")
 	}
 	jwks, err := keyfunc.Get(jwksURL, keyfunc.Options{
 		RefreshInterval:   time.Hour,
