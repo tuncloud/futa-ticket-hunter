@@ -411,6 +411,7 @@ input,button,select,textarea{font-family:inherit}
 .login-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
 .login-desc{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
 .login-actions{display:flex;justify-content:center;min-height:44px}
+.login-error{font-size:12px;color:var(--red);margin-top:16px}
 </style>
 </head>
 <body>
@@ -704,7 +705,7 @@ async function getSessionToken(){
 
 window.fetch=async function(input,init){
   const url=typeof input==='string'?input:input.url;
-  if(url&&url.startsWith('/api/')&&url!=='/api/config'){
+  if(url&&url.startsWith('/api/')&&url!=='/api/config'&&url!=='/api/auth/logout'){
     const token=await getSessionToken();
     if(token){
       const headers=new Headers(init?.headers||(input instanceof Request?input.headers:undefined));

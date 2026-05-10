@@ -74,7 +74,7 @@ func (v *ClerkVerifier) VerifySession(token string) (*Session, error) {
 	if name == "" {
 		first := claimString(claims, "first_name")
 		last := claimString(claims, "last_name")
-		name = strings.TrimSpace(strings.TrimSpace(first + " " + last))
+		name = strings.TrimSpace(first + " " + last)
 	}
 	picture := claimString(claims, "image_url")
 	if picture == "" {

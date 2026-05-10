@@ -51,7 +51,7 @@ func main() {
 	}
 	clerkVerifier, err := auth.NewClerkVerifier(cfg.Clerk.Issuer, cfg.Clerk.JWKSURL)
 	if err != nil {
-		log.Printf("WARNING: clerk auth is not configured: %v", err)
+		log.Printf("WARNING: clerk auth is not configured: %v (API requests will be rejected)", err)
 	}
 
 	mux := http.NewServeMux()
@@ -84,6 +84,7 @@ func main() {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
+		// Clerk handles logout client-side; this endpoint exists for API parity.
 		jsonOK(w, map[string]string{"message": "logged out"})
 	})
 
