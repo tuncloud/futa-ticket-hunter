@@ -413,7 +413,6 @@ input,button,select,textarea{font-family:inherit}
 .login-actions{display:flex;justify-content:center;min-height:44px}
 .login-error{font-size:12px;color:var(--red);margin-top:16px}
 </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -425,9 +424,9 @@ input,button,select,textarea{font-family:inherit}
       <div class="logo-text">Futa<span>Hunter</span></div>
     </div>
     <h2 class="login-title">Chào mừng đến với FutaHunter</h2>
-    <p class="login-desc">Đăng nhập bằng tài khoản Google để bắt đầu săn vé xe Phương Trang tự động</p>
-    <div class="login-actions" id="googleSignInBtn"></div>
-    <p id="loginError" class="login-error" style="display:none">Không thể tải Google Sign-In. Vui lòng thử lại sau.</p>
+    <p class="login-desc">Đăng nhập để bắt đầu săn vé xe Phương Trang tự động</p>
+    <div class="login-actions" id="clerkSignIn"></div>
+    <p id="loginError" class="login-error" style="display:none">Không thể tải hệ thống đăng nhập. Vui lòng thử lại sau.</p>
   </div>
 </div>
 
@@ -652,6 +651,71 @@ function setCookie(name,value,days){
   document.cookie=name+'='+encodeURIComponent(value)+';expires='+d.toUTCString()+';path=/;SameSite=Strict';
 }
 
+// ===== CLERK AUTH =====
+const rawFetch=window.fetch.bind(window);
+let clerkLoadPromise=null;
+let clerkMounted=false;
+let clerkListenerAttached=false;
+
+function loadClerkScript(){
+  if(window.Clerk)return Promise.resolve();
+  const existing=document.getElementById('clerk-js');
+  if(existing){
+    return new Promise((resolve,reject)=>{
+      existing.addEventListener('load',resolve,{once:true});
+      existing.addEventListener('error',reject,{once:true});
+    });
+  }
+  return new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.id='clerk-js';
+    script.src='https://js.clerk.com/v4/clerk.browser.js';
+    script.async=true;
+    script.defer=true;
+    script.crossOrigin='anonymous';
+    script.onload=()=>resolve();
+    script.onerror=reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function ensureClerkLoaded(){
+  if(clerkLoadPromise)return clerkLoadPromise;
+  clerkLoadPromise=(async()=>{
+    const cfg=await rawFetch('/api/config').then(r=>r.json());
+    const publishableKey=(cfg.clerk_publishable_key||'').trim();
+    if(!publishableKey){
+      throw new Error('Clerk publishable key missing');
+    }
+    await loadClerkScript();
+    await Clerk.load({publishableKey});
+    if(!clerkListenerAttached){
+      Clerk.addListener(()=>syncAuthState());
+      clerkListenerAttached=true;
+    }
+    return publishableKey;
+  })();
+  return clerkLoadPromise;
+}
+
+async function getSessionToken(){
+  if(!window.Clerk||!Clerk.session)return '';
+  return Clerk.session.getToken();
+}
+
+window.fetch=async function(input,init){
+  const url=typeof input==='string'?input:input.url;
+  if(url&&url.startsWith('/api/')&&url!=='/api/config'&&url!=='/api/auth/logout'){
+    const token=await getSessionToken();
+    if(token){
+      const headers=new Headers(init?.headers||(input instanceof Request?input.headers:undefined));
+      headers.set('Authorization','Bearer '+token);
+      init={...init,headers};
+    }
+  }
+  return rawFetch(input,init);
+};
+
 // ===== POSTHOG =====
 let posthogReady=false;
 async function initPosthog(){
@@ -720,8 +784,12 @@ $$('.nav-tab[data-view]').forEach(t=>t.addEventListener('click',()=>goToView(t.d
 $('#logoBtn').addEventListener('click',()=>goToView('search'));
 $('#ticketCreateBtn').addEventListener('click',()=>goToView('search'));
 
-// ===== GOOGLE AUTH =====
-async function checkAuth(){
+// ===== CLERK AUTH =====
+async function syncAuthState(){
+  if(!window.Clerk||!Clerk.user||!Clerk.session){
+    showLoginScreen();
+    return;
+  }
   try{
     const resp=await fetch('/api/auth/me');
     if(resp.ok){
@@ -733,41 +801,31 @@ async function checkAuth(){
   }catch(e){showLoginScreen();}
 }
 
-async function showLoginScreen(){
-  $('#loginOverlay').style.display='flex';
+async function checkAuth(){
   try{
-    const cfg=await fetch('/api/config').then(r=>r.json());
-    if(!cfg.google_client_id){
-      $('#loginError').textContent='Google Sign-In hiện không khả dụng. Vui lòng liên hệ quản trị viên.';
-      $('#loginError').style.display='block';
-      return;
-    }
-    // Wait up to 5 s for Google library to load
-    let attempts=0;
-    while(!window.google?.accounts?.id&&attempts<50){
-      await new Promise(r=>setTimeout(r,100));
-      attempts++;
-    }
-    if(!window.google?.accounts?.id){
-      $('#loginError').style.display='block';
-      return;
-    }
-    google.accounts.id.initialize({client_id:cfg.google_client_id,callback:handleGoogleSignIn});
-    google.accounts.id.renderButton($('#googleSignInBtn'),{theme:'outline',size:'large',text:'signin_with',locale:'vi'});
-  }catch(e){$('#loginError').style.display='block';}
+    await ensureClerkLoaded();
+    await syncAuthState();
+  }catch(e){
+    showLoginScreen();
+  }
 }
 
-async function handleGoogleSignIn(response){
+async function showLoginScreen(){
+  $('#loginOverlay').style.display='flex';
+  $('#loginError').style.display='none';
   try{
-    const resp=await fetch('/api/auth/google',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id_token:response.credential})
-    });
-    if(!resp.ok)throw new Error('Đăng nhập thất bại');
-    const user=await resp.json();
-    $('#loginOverlay').style.display='none';
-    onAuthSuccess(user);
-  }catch(e){toast(e.message,'error');}
+    await ensureClerkLoaded();
+    if(!clerkMounted){
+      Clerk.mountSignIn($('#clerkSignIn'),{
+        afterSignInUrl:window.location.href,
+        afterSignUpUrl:window.location.href
+      });
+      clerkMounted=true;
+    }
+  }catch(e){
+    $('#loginError').textContent='Hệ thống đăng nhập hiện không khả dụng. Vui lòng liên hệ quản trị viên.';
+    $('#loginError').style.display='block';
+  }
 }
 
 function onAuthSuccess(user){
@@ -782,7 +840,7 @@ function onAuthSuccess(user){
   if(posthogReady){
     posthog.identify(user.email,{name:user.name,email:user.email});
   }
-  // Pre-fill email from Google account
+  // Pre-fill email from account
   if(user.email&&!$('#fEmail').value){
     $('#fEmail').value=user.email;
     setCookie('futa_email',user.email,365);
@@ -791,6 +849,9 @@ function onAuthSuccess(user){
 }
 
 $('#logoutBtn').addEventListener('click',async()=>{
+  if(window.Clerk){
+    try{await Clerk.signOut();}catch(e){}
+  }
   await fetch('/api/auth/logout',{method:'POST'});
   if(posthogReady)posthog.reset();
   currentUser=null;

@@ -30,8 +30,12 @@ futa:
   app_version: "7.36.4"
   channel: "mobile_app"
 
-google:
-  client_id: "838486469503-ksnr6eohe6s7u2g35ucq7lorl451hpt9.apps.googleusercontent.com"
+clerk:
+  # Values can be found in the Clerk Dashboard for your instance.
+  publishable_key: ""
+  secret_key: ""
+  issuer: ""
+  jwks_url: ""
 
 posthog:
   api_key: "phc_4n50GvMzI3AWztKFdYOhD8BFY2G1qotI6zqk0OAZU5k"
