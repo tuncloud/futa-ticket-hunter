@@ -15,7 +15,7 @@ type Config struct {
 	Webhook  WebhookConfig  `yaml:"webhook"`
 	Email    EmailConfig    `yaml:"email"`
 	Futa     FutaConfig     `yaml:"futa"`
-	Google   GoogleConfig   `yaml:"google"`
+	Clerk    ClerkConfig    `yaml:"clerk"`
 	Posthog  PosthogConfig  `yaml:"posthog"`
 }
 
@@ -24,8 +24,11 @@ type PosthogConfig struct {
 	Host   string `yaml:"host" envconfig:"POSTHOG_HOST"`
 }
 
-type GoogleConfig struct {
-	ClientID string `yaml:"client_id" envconfig:"GOOGLE_CLIENT_ID"`
+type ClerkConfig struct {
+	PublishableKey string `yaml:"publishable_key" envconfig:"CLERK_PUBLISHABLE_KEY"`
+	SecretKey      string `yaml:"secret_key" envconfig:"CLERK_SECRET_KEY"`
+	Issuer         string `yaml:"issuer" envconfig:"CLERK_ISSUER"`
+	JWKSURL        string `yaml:"jwks_url" envconfig:"CLERK_JWKS_URL"`
 }
 
 type ServerConfig struct {

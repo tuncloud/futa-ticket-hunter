@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
@@ -45,22 +46,13 @@ func main() {
 
 	futaClient := futa.NewClient(cfg.Futa)
 
-	if cfg.Google.ClientID == "" {
-		log.Println("WARNING: google.client_id is not configured — Google Sign-In will not work")
+	if cfg.Clerk.PublishableKey == "" {
+		log.Println("WARNING: clerk.publishable_key is not configured — Clerk Sign-In will not work")
 	}
-
-	sessions := newDBSessionStore(db)
-
-	// Periodically clean up expired sessions from the database.
-	go func() {
-		ticker := time.NewTicker(time.Hour)
-		defer ticker.Stop()
-		for range ticker.C {
-			if err := db.DeleteExpiredSessions(context.Background()); err != nil {
-				log.Printf("clean expired sessions: %v", err)
-			}
-		}
-	}()
+	clerkVerifier, err := auth.NewClerkVerifier(cfg.Clerk.Issuer, cfg.Clerk.JWKSURL)
+	if err != nil {
+		log.Printf("WARNING: clerk auth is not configured: %v", err)
+	}
 
 	mux := http.NewServeMux()
 
@@ -69,58 +61,16 @@ func main() {
 	// Public config (exposes non-secret runtime config to the frontend)
 	mux.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
 		jsonOK(w, map[string]string{
-			"google_client_id": cfg.Google.ClientID,
-			"posthog_api_key":  cfg.Posthog.APIKey,
-			"posthog_host":     cfg.Posthog.Host,
+			"clerk_publishable_key": cfg.Clerk.PublishableKey,
+			"posthog_api_key":       cfg.Posthog.APIKey,
+			"posthog_host":          cfg.Posthog.Host,
 		})
-	})
-
-	// Sign in with Google: verify ID token, create session
-	mux.HandleFunc("/api/auth/google", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		var req struct {
-			IDToken string `json:"id_token"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.IDToken == "" {
-			jsonError(w, "id_token is required", http.StatusBadRequest)
-			return
-		}
-		info, err := auth.VerifyGoogleIDToken(req.IDToken, cfg.Google.ClientID)
-		if err != nil {
-			log.Printf("google auth: %v", err)
-			jsonError(w, "authentication failed", http.StatusUnauthorized)
-			return
-		}
-		token := sessions.Create(info.Email, info.Name, info.Picture)
-		if token == "" {
-			jsonError(w, "failed to create session", http.StatusInternalServerError)
-			return
-		}
-		secure := r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
-		http.SetCookie(w, &http.Cookie{
-			Name:     "futa_session",
-			Value:    token,
-			Path:     "/",
-			MaxAge:   int(auth.SessionDuration / time.Second),
-			HttpOnly: true,
-			Secure:   secure,
-			SameSite: http.SameSiteLaxMode,
-		})
-		jsonOK(w, map[string]string{"email": info.Email, "name": info.Name, "picture": info.Picture})
 	})
 
 	// Get current authenticated user
 	mux.HandleFunc("/api/auth/me", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
-		cookie, err := r.Cookie("futa_session")
-		if err != nil || cookie.Value == "" {
-			jsonError(w, "unauthorized", http.StatusUnauthorized)
-			return
-		}
-		sess := sessions.Get(cookie.Value)
+		sess := auth.SessionFromContext(r.Context())
 		if sess == nil {
 			jsonError(w, "unauthorized", http.StatusUnauthorized)
 			return
@@ -134,19 +84,6 @@ func main() {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if cookie, err := r.Cookie("futa_session"); err == nil && cookie.Value != "" {
-			sessions.Delete(cookie.Value)
-		}
-		secure := r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
-		http.SetCookie(w, &http.Cookie{
-			Name:     "futa_session",
-			Value:    "",
-			Path:     "/",
-			MaxAge:   -1,
-			HttpOnly: true,
-			Secure:   secure,
-			SameSite: http.SameSiteLaxMode,
-		})
 		jsonOK(w, map[string]string{"message": "logged out"})
 	})
 
@@ -427,7 +364,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
-		Handler: corsMiddleware(authMiddleware(mux, sessions)),
+		Handler: corsMiddleware(authMiddleware(mux, clerkVerifier)),
 	}
 
 	go func() {
@@ -451,7 +388,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -460,21 +397,25 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// authMiddleware protects all /api/* routes except /api/auth/* and /api/config.
+// authMiddleware protects all /api/* routes except /api/config and /api/auth/logout.
 // Valid requests have their session attached to the request context.
-func authMiddleware(next http.Handler, sessions auth.SessionStore) http.Handler {
+func authMiddleware(next http.Handler, clerkVerifier *auth.ClerkVerifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if strings.HasPrefix(path, "/api/") &&
-			!strings.HasPrefix(path, "/api/auth/") &&
-			path != "/api/config" {
-			cookie, err := r.Cookie("futa_session")
-			if err != nil || cookie.Value == "" {
+			path != "/api/config" &&
+			path != "/api/auth/logout" {
+			token, err := bearerToken(r)
+			if err != nil {
 				jsonError(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
-			sess := sessions.Get(cookie.Value)
-			if sess == nil {
+			if clerkVerifier == nil {
+				jsonError(w, "authentication not configured", http.StatusUnauthorized)
+				return
+			}
+			sess, err := clerkVerifier.VerifySession(token)
+			if err != nil {
 				jsonError(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -495,36 +436,14 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
 }
 
-// dbSessionStore is an auth.SessionStore backed by PostgreSQL so that sessions
-// survive server restarts.
-type dbSessionStore struct {
-	db *database.DB
-}
-
-func newDBSessionStore(db *database.DB) *dbSessionStore {
-	return &dbSessionStore{db: db}
-}
-
-func (s *dbSessionStore) Create(email, name, picture string) string {
-	token := auth.NewToken()
-	expiresAt := time.Now().Add(auth.SessionDuration)
-	if err := s.db.CreateSession(context.Background(), token, email, name, picture, expiresAt); err != nil {
-		log.Printf("create session in db: %v", err)
-		return ""
+func bearerToken(r *http.Request) (string, error) {
+	authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
+	if authHeader == "" {
+		return "", errors.New("missing authorization header")
 	}
-	return token
-}
-
-func (s *dbSessionStore) Get(token string) *auth.Session {
-	email, name, picture, createdAt, err := s.db.GetSession(context.Background(), token)
-	if err != nil {
-		return nil
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") || strings.TrimSpace(parts[1]) == "" {
+		return "", errors.New("invalid authorization header")
 	}
-	return &auth.Session{Email: email, Name: name, Picture: picture, CreatedAt: createdAt}
-}
-
-func (s *dbSessionStore) Delete(token string) {
-	if err := s.db.DeleteSession(context.Background(), token); err != nil {
-		log.Printf("delete session from db: %v", err)
-	}
+	return strings.TrimSpace(parts[1]), nil
 }
