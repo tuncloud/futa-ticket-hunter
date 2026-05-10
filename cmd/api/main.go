@@ -51,7 +51,7 @@ func main() {
 	}
 	clerkVerifier, err := auth.NewClerkVerifier(cfg.Clerk.Issuer, cfg.Clerk.JWKSURL)
 	if err != nil {
-		log.Printf("WARNING: clerk auth is not configured: %v (API requests will be rejected)", err)
+		log.Printf("WARNING: clerk auth is not configured: %v (server will start in degraded auth mode)", err)
 	}
 
 	mux := http.NewServeMux()
@@ -412,7 +412,7 @@ func authMiddleware(next http.Handler, clerkVerifier *auth.ClerkVerifier) http.H
 				return
 			}
 			if clerkVerifier == nil {
-				jsonError(w, "authentication not configured", http.StatusUnauthorized)
+				jsonError(w, "authentication not configured", http.StatusInternalServerError)
 				return
 			}
 			sess, err := clerkVerifier.VerifySession(token)
